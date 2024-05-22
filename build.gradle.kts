@@ -38,6 +38,15 @@ dependencies {
     testImplementation("org.springframework.restdocs:spring-restdocs-mockmvc")
     testImplementation("org.springframework.security:spring-security-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    // kotest
+    testImplementation("io.kotest:kotest-runner-junit5:5.4.2")
+    testImplementation("io.kotest:kotest-assertions-core:5.4.2")
+    testImplementation("io.kotest.extensions:kotest-extensions-spring:1.1.2")
+    testImplementation("io.kotest:kotest-property:4.5.0")
+    // mockk
+    testImplementation("io.mockk:mockk:1.13.8")
+    // spring retry
+    implementation("org.springframework.retry:spring-retry:2.0.6")
 }
 
 tasks.withType<KotlinCompile> {
