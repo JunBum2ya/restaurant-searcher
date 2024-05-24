@@ -1,4 +1,4 @@
-package com.midas.restaurant.restaurant.domain
+package com.midas.restaurant.direction.domain
 
 import com.midas.restaurant.common.domain.BaseEntity
 import jakarta.persistence.Entity
@@ -7,17 +7,16 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 
 @Entity
-class Restaurant(
+class Direction(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private var id: Long? = null,
-    val name: String,
-    val address: String,
-    val roadAddressName: String,
-    val majorCategory: String? = null,
-    val minorCategory: String? = null,
-    val phoneNumber: String,
-    val websiteUrl: String,
-    val latitude: Double,
-    val longitude: Double
+    val inputAddress: String,
+    val inputLatitude: Double,
+    val inputLongitude: Double,
+    val targetName: String,
+    val targetAddress: String,
+    val targetLatitude: Double,
+    val targetLongitude: Double,
+    val distance: Double
 ): BaseEntity() {
 
     fun getId(): Long? {

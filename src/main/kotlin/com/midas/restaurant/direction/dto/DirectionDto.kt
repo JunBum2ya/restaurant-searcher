@@ -1,6 +1,7 @@
 package com.midas.restaurant.direction.dto
 
 import com.midas.restaurant.common.dto.BaseTimeDto
+import com.midas.restaurant.direction.domain.Direction
 import java.time.LocalDateTime
 
 class DirectionDto(
@@ -16,4 +17,36 @@ class DirectionDto(
     createdAt: LocalDateTime? = null,
     updatedAt: LocalDateTime? = null
 ) : BaseTimeDto(createdAt, updatedAt) {
+
+    companion object {
+        fun from(direction: Direction): DirectionDto {
+            return DirectionDto(
+                id = direction.getId(),
+                inputAddress = direction.inputAddress,
+                inputLatitude = direction.inputLatitude,
+                inputLongitude = direction.inputLongitude,
+                targetName = direction.targetName,
+                targetAddress = direction.targetAddress,
+                targetLatitude = direction.targetLatitude,
+                targetLongitude = direction.targetLongitude,
+                distance = direction.distance,
+                createdAt = direction.getCreatedAt(),
+                updatedAt = direction.getUpdatedAt()
+            )
+        }
+    }
+
+    fun toEntity(): Direction {
+        return Direction(
+            inputAddress = inputAddress,
+            inputLatitude = inputLatitude,
+            inputLongitude = inputLongitude,
+            targetName = targetName,
+            targetAddress = targetAddress,
+            targetLatitude = targetLatitude,
+            targetLongitude = targetLongitude,
+            distance = distance
+        )
+    }
+
 }
