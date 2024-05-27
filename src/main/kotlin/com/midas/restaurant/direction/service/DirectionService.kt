@@ -1,9 +1,9 @@
 package com.midas.restaurant.direction.service
 
 import com.midas.restaurant.api.contant.KakaoCategory
-import com.midas.restaurant.api.dto.response.DocumentResponse
+import com.midas.restaurant.api.dto.response.AddressDocumentResponse
+import com.midas.restaurant.api.dto.response.CategoryDocumentResponse
 import com.midas.restaurant.api.service.KakaoApiService
-import com.midas.restaurant.direction.dto.DirectionDto
 import com.midas.restaurant.direction.dto.DirectionWithRestaurantDto
 import com.midas.restaurant.restaurant.dto.RestaurantDto
 import com.midas.restaurant.restaurant.service.RestaurantService
@@ -16,7 +16,7 @@ class DirectionService(private val restaurantService: RestaurantService, private
     private val RADIUS_KM = 10.0 // 반경 10 km
     private val DIRECTION_BASE_URL = "https://map.kakao.com/link/map/"
 
-    fun buildDirectionList(documentResponse: DocumentResponse): List<DirectionWithRestaurantDto> {
+    fun buildDirectionList(documentResponse: CategoryDocumentResponse): List<DirectionWithRestaurantDto> {
         return restaurantService.searchRestaurantDtoList()
             .stream()
             .map {
@@ -38,7 +38,7 @@ class DirectionService(private val restaurantService: RestaurantService, private
             .collect(Collectors.toList())
     }
 
-    fun buildDirectionListByCategoryApi(documentResponse: DocumentResponse): List<DirectionWithRestaurantDto> {
+    fun buildDirectionListByCategoryApi(documentResponse: AddressDocumentResponse): List<DirectionWithRestaurantDto> {
         val documentList = kakaoApiService.requestCategorySearch(
             documentResponse.latitude,
             documentResponse.longitude,
@@ -53,7 +53,7 @@ class DirectionService(private val restaurantService: RestaurantService, private
         return documentList.stream()
             .map {
                 DirectionWithRestaurantDto(
-                    inputAddress = documentResponse.addressName,
+                    inputAddress = documentResponse.name,
                     inputLatitude = documentResponse.latitude,
                     inputLongitude = documentResponse.longitude,
                     distance = calculateDistance(

@@ -1,7 +1,6 @@
 package com.midas.restaurant.restaurant.dto
 
-import com.midas.restaurant.api.dto.response.DocumentResponse
-import com.midas.restaurant.api.dto.response.KakaoApiResponse
+import com.midas.restaurant.api.dto.response.CategoryDocumentResponse
 import com.midas.restaurant.common.dto.BaseTimeDto
 import com.midas.restaurant.restaurant.domain.Restaurant
 import java.time.LocalDateTime
@@ -39,7 +38,7 @@ class RestaurantDto(
             )
         }
 
-        fun from(documentResponse: DocumentResponse): RestaurantDto {
+        fun from(documentResponse: CategoryDocumentResponse): RestaurantDto {
             val categories = documentResponse.categoryName
             return RestaurantDto(
                 name = documentResponse.placeName,

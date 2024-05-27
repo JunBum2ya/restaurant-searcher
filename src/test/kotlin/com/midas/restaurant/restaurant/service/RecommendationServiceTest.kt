@@ -1,6 +1,7 @@
 package com.midas.restaurant.restaurant.service
 
-import com.midas.restaurant.api.dto.response.DocumentResponse
+import com.midas.restaurant.api.dto.response.AddressDocumentResponse
+import com.midas.restaurant.api.dto.response.CategoryDocumentResponse
 import com.midas.restaurant.api.dto.response.KakaoApiResponse
 import com.midas.restaurant.api.dto.response.MetaResponse
 import com.midas.restaurant.api.service.KakaoApiService
@@ -21,7 +22,7 @@ class RecommendationServiceTest : BehaviorSpec({
 
     Given("주소가 주어졌을 때") {
         val address = "경기도"
-        val document = DocumentResponse(
+        val document = CategoryDocumentResponse(
             id = "test",
             placeName = "장강",
             addressName = "경기도",
@@ -36,16 +37,16 @@ class RecommendationServiceTest : BehaviorSpec({
             longitude = 0.0,
         )
         every { kakaoApiService.requestAddressSearch(any(String::class)) }.returns(
-            KakaoApiResponse(
+            KakaoApiResponse<AddressDocumentResponse>(
                 meta = MetaResponse(
                     totalCount = 1,
                     pageableCount = 10,
                     end = true
                 ),
-                documents = listOf(document)
+                documents = listOf(AddressDocumentResponse(name = "test", latitude = 4.5, longitude = 2.5)),
             )
         )
-        every { directionService.buildDirectionListByCategoryApi(any(DocumentResponse::class)) }.returns(
+        every { directionService.buildDirectionListByCategoryApi(any(AddressDocumentResponse::class)) }.returns(
             listOf(
                 DirectionWithRestaurantDto(
                     id = 1L,
@@ -62,7 +63,7 @@ class RecommendationServiceTest : BehaviorSpec({
             Then("음식점 목록이 반환된다.") {
                 restaurantList.size shouldBe 1
                 verify { kakaoApiService.requestAddressSearch(any(String::class)) }
-                verify { directionService.buildDirectionListByCategoryApi(any(DocumentResponse::class)) }
+                verify { directionService.buildDirectionListByCategoryApi(any(AddressDocumentResponse::class)) }
             }
         }
     }
@@ -77,13 +78,13 @@ class RecommendationServiceTest : BehaviorSpec({
                 ), documents = listOf()
             )
         )
-        every { directionService.buildDirectionListByCategoryApi(any(DocumentResponse::class)) }.returns(listOf())
+        every { directionService.buildDirectionListByCategoryApi(any(AddressDocumentResponse::class)) }.returns(listOf())
         When("주소를 기반으로 음식점을 조회를 하면") {
             val restaurantList = recommendationService.recommendRestaurantList(address)
             Then("빈 리스트가 반환된다.") {
                 restaurantList.isEmpty() shouldBe true
                 verify { kakaoApiService.requestAddressSearch(any(String::class)) }
-                verify { directionService.buildDirectionListByCategoryApi(any(DocumentResponse::class)) }
+                verify { directionService.buildDirectionListByCategoryApi(any(AddressDocumentResponse::class)) }
             }
         }
     }

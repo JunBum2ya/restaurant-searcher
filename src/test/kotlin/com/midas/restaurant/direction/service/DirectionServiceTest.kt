@@ -1,8 +1,7 @@
 package com.midas.restaurant.direction.service
 
-import com.midas.restaurant.api.dto.response.DocumentResponse
+import com.midas.restaurant.api.dto.response.CategoryDocumentResponse
 import com.midas.restaurant.api.service.KakaoApiService
-import com.midas.restaurant.restaurant.domain.Restaurant
 import com.midas.restaurant.restaurant.dto.RestaurantDto
 import com.midas.restaurant.restaurant.service.RestaurantService
 import io.kotest.core.spec.style.BehaviorSpec
@@ -19,7 +18,7 @@ class DirectionServiceTest : BehaviorSpec({
     val inputLatitude = 37.5960650456809
     val inputLongitude = 127.037033003036
 
-    val document = DocumentResponse(
+    val document = CategoryDocumentResponse(
         placeName = "만다린",
         addressName = "경기도",
         latitude = inputLatitude,
