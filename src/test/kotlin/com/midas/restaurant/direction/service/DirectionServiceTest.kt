@@ -56,8 +56,8 @@ class DirectionServiceTest : BehaviorSpec({
             val directions = directionService.buildDirectionList(document)
             Then("결과 값이 거리순으로 조회가 된다.") {
                 directions.size shouldBe 2
-                directions[0].targetName shouldBe "칼국수"
-                directions[1].targetName shouldBe "중국요리"
+                directions[0].restaurant.name shouldBe "칼국수"
+                directions[1].restaurant.name shouldBe "중국요리"
                 verify { restaurantService.searchRestaurantDtoList() }
             }
         }
@@ -72,7 +72,7 @@ class DirectionServiceTest : BehaviorSpec({
             val directions = directionService.buildDirectionList(document)
             Then("음식점 1개만 조회된다.") {
                 directions.size shouldBe 1
-                directions[0].targetName shouldBe "장강"
+                directions[0].restaurant.name shouldBe "장강"
                 verify { restaurantService.searchRestaurantDtoList() }
             }
         }

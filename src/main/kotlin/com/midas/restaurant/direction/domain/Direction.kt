@@ -1,10 +1,8 @@
 package com.midas.restaurant.direction.domain
 
 import com.midas.restaurant.common.domain.BaseEntity
-import jakarta.persistence.Entity
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
+import com.midas.restaurant.restaurant.domain.Restaurant
+import jakarta.persistence.*
 
 @Entity
 class Direction(
@@ -12,12 +10,9 @@ class Direction(
     val inputAddress: String,
     val inputLatitude: Double,
     val inputLongitude: Double,
-    val targetName: String,
-    val targetAddress: String,
-    val targetLatitude: Double,
-    val targetLongitude: Double,
+    @ManyToOne(fetch = FetchType.LAZY, optional = false) @JoinColumn(name = "restaurant_id") val restaurant: Restaurant,
     val distance: Double
-): BaseEntity() {
+) : BaseEntity() {
 
     fun getId(): Long? {
         return id

@@ -4,6 +4,8 @@ import com.midas.restaurant.api.contant.KakaoCategory
 import com.midas.restaurant.api.dto.response.DocumentResponse
 import com.midas.restaurant.api.service.KakaoApiService
 import com.midas.restaurant.direction.dto.DirectionDto
+import com.midas.restaurant.direction.dto.DirectionWithRestaurantDto
+import com.midas.restaurant.restaurant.dto.RestaurantDto
 import com.midas.restaurant.restaurant.service.RestaurantService
 import org.springframework.stereotype.Service
 import java.util.stream.Collectors
@@ -14,24 +16,21 @@ class DirectionService(private val restaurantService: RestaurantService, private
     private val RADIUS_KM = 10.0 // 반경 10 km
     private val DIRECTION_BASE_URL = "https://map.kakao.com/link/map/"
 
-    fun buildDirectionList(documentResponse: DocumentResponse): List<DirectionDto> {
+    fun buildDirectionList(documentResponse: DocumentResponse): List<DirectionWithRestaurantDto> {
         return restaurantService.searchRestaurantDtoList()
             .stream()
             .map {
-                DirectionDto(
+                DirectionWithRestaurantDto(
                     inputAddress = documentResponse.addressName,
                     inputLatitude = documentResponse.latitude,
                     inputLongitude = documentResponse.longitude,
-                    targetName = it.name,
-                    targetAddress = it.address,
-                    targetLatitude = it.latitude,
-                    targetLongitude = it.longitude,
                     distance = calculateDistance(
                         documentResponse.latitude,
                         documentResponse.longitude,
                         it.latitude,
                         it.longitude
-                    )
+                    ),
+                    restaurant = it
                 )
             }.filter { it.distance <= RADIUS_KM }
             .sorted(Comparator.comparing { it.distance })
@@ -57,10 +56,6 @@ class DirectionService(private val restaurantService: RestaurantService, private
                     inputAddress = documentResponse.addressName,
                     inputLatitude = documentResponse.latitude,
                     inputLongitude = documentResponse.longitude,
-                    targetName = it.placeName,
-                    targetAddress = it.addressName,
-                    targetLatitude = it.latitude,
-                    targetLongitude = it.longitude,
                     distance = calculateDistance(
                         documentResponse.latitude,
                         documentResponse.longitude,
