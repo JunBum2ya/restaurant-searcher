@@ -10,28 +10,11 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-class RestaurantService(
-    private val restaurantRepository: RestaurantRepository,
-    private val kakaoApiService: KakaoApiService
-) {
-
-    private val radius = 10.0
-    private val category = KakaoCategory.RESTAURANT
-
-    private val log = LoggerFactory.getLogger(RestaurantService::class.java)
+class RestaurantService(private val restaurantRepository: RestaurantRepository) {
 
     @Transactional(readOnly = true)
     fun searchRestaurantDtoList(): List<RestaurantDto> {
         return restaurantRepository.findAll().map { RestaurantDto.from(it) }
-    }
-
-    fun recommendRestaurantList(address: String) {
-
-    }
-
-    fun recommendRestaurantList(latitude: Double, longitude: Double) {
-        val kakaoApiResponse = kakaoApiService.requestCategorySearch(latitude, longitude, radius, category)
-
     }
 
 }

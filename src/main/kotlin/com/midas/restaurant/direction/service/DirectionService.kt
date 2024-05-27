@@ -38,7 +38,7 @@ class DirectionService(private val restaurantService: RestaurantService, private
             .collect(Collectors.toList())
     }
 
-    fun buildDirectionListByCategoryApi(documentResponse: DocumentResponse): List<DirectionDto> {
+    fun buildDirectionListByCategoryApi(documentResponse: DocumentResponse): List<DirectionWithRestaurantDto> {
         val documentList = kakaoApiService.requestCategorySearch(
             documentResponse.latitude,
             documentResponse.longitude,
@@ -52,7 +52,7 @@ class DirectionService(private val restaurantService: RestaurantService, private
 
         return documentList.stream()
             .map {
-                DirectionDto(
+                DirectionWithRestaurantDto(
                     inputAddress = documentResponse.addressName,
                     inputLatitude = documentResponse.latitude,
                     inputLongitude = documentResponse.longitude,
@@ -61,7 +61,8 @@ class DirectionService(private val restaurantService: RestaurantService, private
                         documentResponse.longitude,
                         it.latitude,
                         it.longitude
-                    )
+                    ),
+                    restaurant = RestaurantDto.from(it)
                 )
             }.limit(MAX_SEARCH_COUNT)
             .collect(Collectors.toList())

@@ -1,11 +1,13 @@
 package com.midas.restaurant.restaurant.dto
 
+import com.midas.restaurant.api.dto.response.DocumentResponse
+import com.midas.restaurant.api.dto.response.KakaoApiResponse
 import com.midas.restaurant.common.dto.BaseTimeDto
 import com.midas.restaurant.restaurant.domain.Restaurant
 import java.time.LocalDateTime
 
 class RestaurantDto(
-    val id: Long?,
+    val id: Long? = null,
     val name: String,
     val address: String,
     val roadAddressName: String,
@@ -34,6 +36,19 @@ class RestaurantDto(
                 longitude = restaurant.longitude,
                 createdAt = restaurant.getCreatedAt(),
                 updatedAt = restaurant.getUpdatedAt()
+            )
+        }
+
+        fun from(documentResponse: DocumentResponse): RestaurantDto {
+            val categories = documentResponse.categoryName
+            return RestaurantDto(
+                name = documentResponse.placeName,
+                address = documentResponse.addressName,
+                roadAddressName = documentResponse.roadAddressName,
+                phoneNumber = documentResponse.phone,
+                websiteUrl = documentResponse.placeUrl,
+                latitude = documentResponse.latitude,
+                longitude = documentResponse.longitude,
             )
         }
     }
