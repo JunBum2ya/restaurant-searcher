@@ -16,12 +16,12 @@ class DirectionService(private val restaurantService: RestaurantService, private
     private val RADIUS_KM = 10.0 // 반경 10 km
     private val DIRECTION_BASE_URL = "https://map.kakao.com/link/map/"
 
-    fun buildDirectionList(documentResponse: CategoryDocumentResponse): List<DirectionWithRestaurantDto> {
+    fun buildDirectionList(documentResponse: AddressDocumentResponse): List<DirectionWithRestaurantDto> {
         return restaurantService.searchRestaurantDtoList()
             .stream()
             .map {
                 DirectionWithRestaurantDto(
-                    inputAddress = documentResponse.addressName,
+                    inputAddress = documentResponse.name,
                     inputLatitude = documentResponse.latitude,
                     inputLongitude = documentResponse.longitude,
                     distance = calculateDistance(
@@ -50,7 +50,9 @@ class DirectionService(private val restaurantService: RestaurantService, private
             return emptyList()
         }
 
-        return documentList.stream()
+        val restaurantList = restaurantService.saveRestaurantList(documentList.map { RestaurantDto.from(it) })
+
+        return restaurantList.stream()
             .map {
                 DirectionWithRestaurantDto(
                     inputAddress = documentResponse.name,
@@ -62,7 +64,7 @@ class DirectionService(private val restaurantService: RestaurantService, private
                         it.latitude,
                         it.longitude
                     ),
-                    restaurant = RestaurantDto.from(it)
+                    restaurant = it
                 )
             }.limit(MAX_SEARCH_COUNT)
             .collect(Collectors.toList())

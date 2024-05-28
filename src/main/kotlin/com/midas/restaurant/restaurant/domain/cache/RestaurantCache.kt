@@ -3,6 +3,7 @@ package com.midas.restaurant.restaurant.domain.cache
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
+import java.time.LocalDateTime
 
 class RestaurantCache(
     val id: Long,
@@ -14,6 +15,8 @@ class RestaurantCache(
     val phoneNumber: String,
     val websiteUrl: String,
     val latitude: Double,
-    val longitude: Double
+    val longitude: Double,
+    val createdAt: LocalDateTime? = null,
+    val updatedAt: LocalDateTime? = null
 ) {
 }

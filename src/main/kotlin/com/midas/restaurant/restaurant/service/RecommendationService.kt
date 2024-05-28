@@ -17,15 +17,19 @@ class RecommendationService(
     fun recommendRestaurantList(address: String): List<RestaurantDto> {
         val kakaoApiResponse = kakaoApiService.requestAddressSearch(address)
 
-        if(kakaoApiResponse == null || kakaoApiResponse.documents.isEmpty()) {
+        if (kakaoApiResponse == null || kakaoApiResponse.documents.isEmpty()) {
             log.error("[PharmacyRecommendationService.recommendPharmacyList fail] Input address: {}", address)
             return emptyList()
         }
 
         val document = kakaoApiResponse.documents[0]
 
-        val directionList = directionService.buildDirectionListByCategoryApi(document)
-        return directionList.map { it.restaurant }
+        val directionList = directionService.buildDirectionList(document)
+        return if (directionList.isNotEmpty()) {
+            directionList.map { it.restaurant }
+        } else {
+            directionService.buildDirectionListByCategoryApi(document).map { it.restaurant }
+        }
     }
 
 }

@@ -3,6 +3,7 @@ package com.midas.restaurant.restaurant.dto
 import com.midas.restaurant.api.dto.response.CategoryDocumentResponse
 import com.midas.restaurant.common.dto.BaseTimeDto
 import com.midas.restaurant.restaurant.domain.Restaurant
+import com.midas.restaurant.restaurant.domain.cache.RestaurantCache
 import java.time.LocalDateTime
 
 class RestaurantDto(
@@ -35,6 +36,23 @@ class RestaurantDto(
                 longitude = restaurant.longitude,
                 createdAt = restaurant.getCreatedAt(),
                 updatedAt = restaurant.getUpdatedAt()
+            )
+        }
+
+        fun from(restaurant: RestaurantCache): RestaurantDto {
+            return RestaurantDto(
+                id = restaurant.id,
+                name = restaurant.name,
+                address = restaurant.address,
+                roadAddressName = restaurant.roadAddressName,
+                majorCategory = restaurant.majorCategory,
+                minorCategory = restaurant.minorCategory,
+                phoneNumber = restaurant.phoneNumber,
+                websiteUrl = restaurant.websiteUrl,
+                latitude = restaurant.latitude,
+                longitude = restaurant.longitude,
+                createdAt = restaurant.createdAt,
+                updatedAt = restaurant.updatedAt
             )
         }
 

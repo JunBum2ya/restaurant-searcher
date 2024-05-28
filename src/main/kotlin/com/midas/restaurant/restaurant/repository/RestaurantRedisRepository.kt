@@ -9,17 +9,17 @@ import org.springframework.stereotype.Repository
 
 @Repository
 class RestaurantRedisRepository(
-    private val redisTemplate: RedisTemplate<String, Any>,
+    redisTemplate: RedisTemplate<String, Any>,
     private val objectMapper: ObjectMapper,
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
 
     private val CACHE_KEY = "RESTAURANT"
 
-    private val hashOperations: HashOperations<String, Long, String> = redisTemplate.opsForHash()
+    private val hashOperations: HashOperations<String, String, String> = redisTemplate.opsForHash()
 
     fun save(restaurant: RestaurantCache): RestaurantCache {
-        hashOperations.put(CACHE_KEY, restaurant.id, serialize(restaurant))
+        hashOperations.put(CACHE_KEY, restaurant.id.toString(), serialize(restaurant))
         return restaurant
     }
 
