@@ -1,5 +1,6 @@
 package com.midas.restaurant.direction.service
 
+import com.midas.restaurant.api.dto.response.AddressDocumentResponse
 import com.midas.restaurant.api.dto.response.CategoryDocumentResponse
 import com.midas.restaurant.api.service.KakaoApiService
 import com.midas.restaurant.restaurant.dto.RestaurantDto
@@ -18,19 +19,10 @@ class DirectionServiceTest : BehaviorSpec({
     val inputLatitude = 37.5960650456809
     val inputLongitude = 127.037033003036
 
-    val document = CategoryDocumentResponse(
-        placeName = "만다린",
-        addressName = "경기도",
+    val document = AddressDocumentResponse(
+        name = "만다린",
         latitude = inputLatitude,
-        longitude = inputLongitude,
-        distance = 10.0,
-        id = "test",
-        categoryGroupCode = "test",
-        categoryGroupName = "test",
-        categoryName = "test",
-        phone = "test",
-        placeUrl = "test",
-        roadAddressName = "test"
+        longitude = inputLongitude
     )
 
     val createRestaurantDto: (Long, String, Double, Double) -> RestaurantDto =
