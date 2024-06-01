@@ -23,12 +23,17 @@ services:
 
   restaurant-recommendation-app:
     container_name: restaurant-recommendation-app
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     depends_on:
       - restaurant-recommendation-redis
       - restaurant-recommendation-database
     image: 22cun2/restaurant-recommendation-app
     environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+      - SPRING_DATABASE_URL=${SPRING_DATABASE_URL}
+      - SPRING_REDIS_HOST=${SPRING_REDIS_HOST}
       - MYSQL_DATABASE=${MYSQL_DATABASE}
       - MYSQL_USER=${MYSQL_USER}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
