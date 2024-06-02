@@ -29,7 +29,7 @@ services:
     depends_on:
       - restaurant-recommendation-redis
       - restaurant-recommendation-database
-    image: 22cun2/restaurant-recommendation-app
+    image: 22cun2/restaurant-recommendation-app:latest
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
       - SPRING_DATABASE_URL=${SPRING_DATABASE_URL}
