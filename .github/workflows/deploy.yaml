@@ -25,24 +25,3 @@ jobs:
       - name: Build and push Docker image
         run: |
           docker buildx build --push --tag 22cun2/restaurant-recommendation-app:latest .
-
-      - name: SSH to EC2 and deploy
-        uses: appleboy/ssh-action@v0.1.6
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ubuntu
-          key: ${{ secrets.EC2_SSH_KEY }}
-          envs:
-            TZ: ${{ variables.TZ }}
-            MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
-            MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
-            MYSQL_USER: ${{ secrets.MYSQL_USER }}
-            MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
-            SPRING_PROFILES_ACTIVE: ${{ secrets.SPRING_PROFILES_ACTIVE }}
-            SPRING_DATABASE_URL: ${{ secrets.SPRING_DATABASE_URL }}
-            SPRING_REDIS_HOST: ${{ secrets.SPRING_REDIS_HOST }}
-            KAKAO_REST_API_KEY: ${{ secrets.KAKAO_REST_API_KEY }}
-          script: |
-            cd ~/restaurant-recommendation
-            docker-compose pull
-            docker-compose up -d
