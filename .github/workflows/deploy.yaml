@@ -33,9 +33,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code(deploy)
-        uses: actions/checkout@v2
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
 
@@ -44,6 +41,11 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Download build artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: restaurantSearcher
+          path: build/libs
       - name: test file
         run: ls
       - name: Build and push Docker image
