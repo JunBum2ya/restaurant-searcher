@@ -11,6 +11,11 @@ jobs:
     steps:
       - name: Checkout Code(build)
         uses: actions/checkout@v2
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          java-version: '21'
+          distribution: 'temurin'
 
   deploy:
     runs-on: ubuntu-latest
