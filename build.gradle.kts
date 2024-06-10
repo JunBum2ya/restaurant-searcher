@@ -68,3 +68,7 @@ tasks.asciidoctor {
     inputs.dir(project.extra["snippetsDir"]!!)
     dependsOn(tasks.test)
 }
+
+tasks.bootJar {
+    archiveFileName = "app.jar"
+}
