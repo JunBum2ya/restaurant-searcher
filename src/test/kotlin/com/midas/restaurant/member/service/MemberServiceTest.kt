@@ -2,7 +2,9 @@ package com.midas.restaurant.member.service
 
 import com.midas.restaurant.common.contant.ResultStatus
 import com.midas.restaurant.exception.CustomException
+import com.midas.restaurant.member.component.JwtTokenProvider
 import com.midas.restaurant.member.domain.Member
+import com.midas.restaurant.member.dto.MemberDetails
 import com.midas.restaurant.member.dto.MemberDto
 import com.midas.restaurant.member.repository.MemberRepository
 import io.kotest.assertions.throwables.shouldThrowExactly
@@ -19,7 +21,8 @@ class MemberServiceTest : BehaviorSpec({
 
     val memberRepository = mockk<MemberRepository>()
     val passwordEncoder = mockk<PasswordEncoder>()
-    val memberService = MemberService(memberRepository,passwordEncoder)
+    val jwtTokenProvider = mockk<JwtTokenProvider>()
+    val memberService = MemberService(memberRepository,passwordEncoder,jwtTokenProvider)
 
     Given("회원 데이터가 주어졌을 때") {
         val memberData = MemberDto(username = "username", password = "password", email = "test@test.com")
@@ -58,8 +61,10 @@ class MemberServiceTest : BehaviorSpec({
         val username = "username"
         val password = "password"
         every { memberRepository.findMemberByUsername(any(String::class)) }
-            .returns(Member(username = "username", password = "password", email = "test@test.com"))
+            .returns(Member(id = 1L, username = "username", password = "password", email = "test@test.com"))
         every { passwordEncoder.matches(any(CharSequence::class), any(String::class)) }.returns(true)
+        every { jwtTokenProvider.tokenValidityInMilliseconds }.returns(1000)
+        every { jwtTokenProvider.generateToken(any(MemberDetails::class)) }.returns("token")
         When("로그인을 진행하면") {
             val authToken = memberService.login(username, password)
             Then("인증 데이터가 반환된다.") {
@@ -68,6 +73,8 @@ class MemberServiceTest : BehaviorSpec({
                 authToken.token shouldBe "token"
                 verify { memberRepository.findMemberByUsername(any(String::class)) }
                 verify { passwordEncoder.matches(any(CharSequence::class), any(String::class)) }
+                verify { jwtTokenProvider.tokenValidityInMilliseconds }
+                verify { jwtTokenProvider.generateToken(any(MemberDetails::class)) }
             }
         }
     }

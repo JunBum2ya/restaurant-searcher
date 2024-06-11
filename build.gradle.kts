@@ -47,6 +47,11 @@ dependencies {
     testImplementation("io.mockk:mockk:1.13.8")
     // spring retry
     implementation("org.springframework.retry:spring-retry:2.0.6")
+    // jwt
+    implementation("io.jsonwebtoken:jjwt-api:0.11.5")
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
+
 }
 
 tasks.withType<KotlinCompile> {
