@@ -1,6 +1,9 @@
 package com.midas.restaurant.member.controller
 
+import com.midas.restaurant.common.dto.response.CommonResponse
 import com.midas.restaurant.member.dto.request.MemberJoinRequest
+import com.midas.restaurant.member.dto.request.MemberLoginRequest
+import com.midas.restaurant.member.dto.response.MemberAuthResponse
 import com.midas.restaurant.member.dto.response.MemberResponse
 import com.midas.restaurant.member.service.MemberService
 import jakarta.validation.Valid
@@ -15,9 +18,15 @@ import org.springframework.web.bind.annotation.RestController
 class MemberController(private val memberService: MemberService) {
 
     @PostMapping("join")
-    fun join(@Valid @RequestBody request: MemberJoinRequest): ResponseEntity<MemberResponse> {
+    fun join(@Valid @RequestBody request: MemberJoinRequest): ResponseEntity<CommonResponse<MemberResponse>> {
         val member = memberService.join(request.toDto())
-        return ResponseEntity.ok(MemberResponse.from(member))
+        return ResponseEntity.ok(CommonResponse.of(MemberResponse.from(member)))
+    }
+
+    @PostMapping("login")
+    fun login(@Valid @RequestBody request: MemberLoginRequest): ResponseEntity<CommonResponse<MemberAuthResponse>> {
+        val tokenData = memberService.login(username = request.username!!, password = request.password!!)
+        return ResponseEntity.ok(CommonResponse.of(MemberAuthResponse.from(tokenData)))
     }
 
 }
