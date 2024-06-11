@@ -1,18 +1,35 @@
 package com.midas.restaurant.member.service
 
+import com.midas.restaurant.common.contant.ResultStatus
+import com.midas.restaurant.exception.CustomException
 import com.midas.restaurant.member.dto.AuthToken
 import com.midas.restaurant.member.dto.MemberDto
+import com.midas.restaurant.member.repository.MemberRepository
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
-class MemberService {
+class MemberService(private val memberRepository: MemberRepository, private val passwordEncoder: PasswordEncoder) {
 
+    @Transactional
     fun join(memberDto: MemberDto): MemberDto {
-        return memberDto
+        val existMember = memberRepository.findMemberByUsername(memberDto.username)
+        if(existMember != null) {
+            throw CustomException(ResultStatus.DUPLICATE_UNIQUE_PROPERTY, "중복된 사용자가 있습니다.")
+        }
+        val registeredMember = memberRepository.save(memberDto.toEntity(passwordEncoder))
+        return MemberDto(registeredMember)
     }
 
+    @Transactional(readOnly = true)
     fun login(username: String, password: String): AuthToken {
-        val authToken = AuthToken(username = username, token = "token")
+        val member = memberRepository.findMemberByUsername(username)
+            ?:throw CustomException(ResultStatus.UNAUTHENTICATED_USER)
+        if(!passwordEncoder.matches(password, member.getPassword())) {
+            throw CustomException(ResultStatus.UNAUTHENTICATED_USER)
+        }
+        val authToken = AuthToken(username = member.getUsername(), token = "token")
         return authToken
     }
 
