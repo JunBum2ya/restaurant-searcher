@@ -22,8 +22,9 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/api/v1/review")
 class ReviewController(private val reviewService: ReviewService) {
 
+    @GetMapping
     fun searchReview(
-        @PageableDefault(size = 10, sort = ["registeredDate"], direction = Sort.Direction.DESC) pageable: Pageable,
+        @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable,
     ): ResponseEntity<CommonResponse<Page<SimpleReviewResponse>>> {
         val page = reviewService.searchReviews(pageable)
         return ResponseEntity.ok(CommonResponse.of(page.map { SimpleReviewResponse.from(it) }))
@@ -38,19 +39,19 @@ class ReviewController(private val reviewService: ReviewService) {
     @PostMapping
     fun createReview(
         @Valid @RequestBody request: ReviewRequest,
-        authentication: Authentication
+        @AuthenticationPrincipal memberDetails: MemberDetails,
     ): ResponseEntity<CommonResponse<ReviewResponse>> {
         val review = reviewService.createReview(
             reviewDto = request.toDto(),
             restaurantId = request.restaurantId,
-            authorId = 1L
+            authorId = memberDetails.id
         )
         return ResponseEntity.ok(
             CommonResponse.of(
                 ReviewResponse.from(
                     review = review,
                     restaurantId = request.restaurantId,
-                    authorId = 1L
+                    authorName = memberDetails.username
                 )
             )
         )
@@ -60,18 +61,18 @@ class ReviewController(private val reviewService: ReviewService) {
     fun updateReview(
         @PathVariable reviewId: Long,
         @Valid @RequestBody request: ReviewRequest,
-        authentication: Authentication
+        @AuthenticationPrincipal memberDetails: MemberDetails,
     ): ResponseEntity<CommonResponse<ReviewResponse>> {
-        val review = reviewService.updateReview(reviewId, request.toDto())
+        val review = reviewService.updateReview(reviewId, request.toDto(), memberDetails.id)
         return ResponseEntity.ok(CommonResponse.of(ReviewResponse.from(review)))
     }
 
     @DeleteMapping("/{reviewId}")
     fun deleteReview(
         @PathVariable reviewId: Long,
-        authentication: Authentication
+        @AuthenticationPrincipal memberDetails: MemberDetails,
     ): ResponseEntity<CommonResponse<Any>> {
-        reviewService.deleteReview(reviewId)
+        reviewService.deleteReview(reviewId, memberDetails.id)
         return ResponseEntity.ok(CommonResponse.of(ResultStatus.SUCCESS))
     }
 

@@ -9,18 +9,18 @@ import java.time.LocalDateTime
 data class ReviewResponse(
     val id: Long,
     val restaurantId: Long,
-    val authorId: Long,
+    val authorName: String,
     val title: String,
     val content: String,
     val createdAt: LocalDateTime? = null,
     val updatedAt: LocalDateTime? = null
 ) {
     companion object {
-        fun from(review: ReviewDto, restaurantId: Long, authorId: Long): ReviewResponse {
+        fun from(review: ReviewDto, restaurantId: Long, authorName: String): ReviewResponse {
             return ReviewResponse(
                 id = review.id ?: throw CustomException(ResultStatus.USE_NOT_PERSIST_ENTITY),
                 restaurantId = restaurantId,
-                authorId = authorId,
+                authorName = authorName,
                 title = review.title,
                 content = review.content,
                 createdAt = review.createdAt,
@@ -32,7 +32,7 @@ data class ReviewResponse(
             return ReviewResponse(
                 id = review.id ?: throw CustomException(ResultStatus.USE_NOT_PERSIST_ENTITY),
                 restaurantId = review.restaurant.id?: throw CustomException(ResultStatus.USE_NOT_PERSIST_ENTITY),
-                authorId = review.author.id ?: throw CustomException(ResultStatus.USE_NOT_PERSIST_ENTITY),
+                authorName = review.author.username,
                 title = review.title,
                 content = review.content,
                 createdAt = review.createdAt,
