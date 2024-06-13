@@ -20,7 +20,7 @@ class ReviewDetailDto(
             return ReviewDetailDto(
                 id = review.id,
                 restaurant = RestaurantDto.from(review.restaurant),
-                author = MemberDto(review.author),
+                author = MemberDto.from(review.author),
                 title = review.getTitle(),
                 content = review.getContent(),
                 createdAt = review.getCreatedAt(),

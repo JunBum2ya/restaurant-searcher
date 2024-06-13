@@ -27,7 +27,7 @@ class MemberService(
             throw CustomException(ResultStatus.DUPLICATE_UNIQUE_PROPERTY, "중복된 사용자가 있습니다.")
         }
         val registeredMember = memberRepository.save(memberDto.toEntity(passwordEncoder))
-        return MemberDto(registeredMember)
+        return MemberDto.from(registeredMember)
     }
 
     @Transactional(readOnly = true)
@@ -38,7 +38,7 @@ class MemberService(
             throw CustomException(ResultStatus.UNAUTHENTICATED_USER)
         }
         val authToken =
-            AuthToken(username = member.getUsername(), token = jwtTokenProvider.generateToken(MemberDto(member)))
+            AuthToken(username = member.getUsername(), token = jwtTokenProvider.generateToken(MemberDto.from(member)))
         return authToken
     }
 

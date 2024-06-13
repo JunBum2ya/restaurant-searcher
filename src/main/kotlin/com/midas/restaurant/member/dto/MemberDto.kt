@@ -13,14 +13,18 @@ class MemberDto(
     val updatedAt: LocalDateTime? = null
 ) {
 
-    constructor(member: Member) : this(
-        member.getId(),
-        member.getUsername(),
-        member.getPassword(),
-        member.getEmail(),
-        member.getCreatedAt(),
-        member.getUpdatedAt()
-    )
+    companion object {
+        fun from(member: Member): MemberDto {
+            return MemberDto(
+                member.getId(),
+                member.getUsername(),
+                member.getPassword(),
+                member.getEmail(),
+                member.getCreatedAt(),
+                member.getUpdatedAt()
+            )
+        }
+    }
 
     fun toEntity(): Member {
         return Member(username = username, password = password, email = email)
