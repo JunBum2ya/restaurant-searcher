@@ -1,15 +1,19 @@
 package com.midas.restaurant.review.controller
 
+import com.midas.restaurant.common.contant.ResultStatus
 import com.midas.restaurant.exception.CustomExceptionHandler
 import com.midas.restaurant.member.dto.MemberDto
 import com.midas.restaurant.restaurant.dto.RestaurantDto
 import com.midas.restaurant.review.dto.ReviewDetailDto
 import com.midas.restaurant.review.service.ReviewService
+import io.kotest.core.spec.IsolationMode
 import io.kotest.core.spec.style.DescribeSpec
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
+import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 
 class ReviewControllerTest : DescribeSpec({
@@ -41,8 +45,12 @@ class ReviewControllerTest : DescribeSpec({
         it("200 OK") {
             mvc.perform(get("/api/v1/review/1"))
                 .andExpect(status().isOk)
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("code").value(ResultStatus.SUCCESS.code))
+                .andExpect(jsonPath("message").value(ResultStatus.SUCCESS.message))
+                .andExpect(jsonPath("data").isMap)
+            verify { reviewService.findReviewDetails(any(Long::class)) }
         }
     }
 
-}) {
-}
+})
