@@ -2,7 +2,7 @@ package com.midas.restaurant.member.service
 
 import com.midas.restaurant.common.contant.ResultStatus
 import com.midas.restaurant.exception.CustomException
-import com.midas.restaurant.member.component.JwtTokenProvider
+import com.midas.restaurant.common.component.JwtTokenProvider
 import com.midas.restaurant.member.dto.AuthToken
 import com.midas.restaurant.member.dto.MemberDetails
 import com.midas.restaurant.member.dto.MemberDto
@@ -27,7 +27,7 @@ class MemberService(
             throw CustomException(ResultStatus.DUPLICATE_UNIQUE_PROPERTY, "중복된 사용자가 있습니다.")
         }
         val registeredMember = memberRepository.save(memberDto.toEntity(passwordEncoder))
-        return MemberDto(registeredMember)
+        return MemberDto.from(registeredMember)
     }
 
     @Transactional(readOnly = true)
@@ -37,12 +37,8 @@ class MemberService(
         if (!passwordEncoder.matches(password, member.getPassword())) {
             throw CustomException(ResultStatus.UNAUTHENTICATED_USER)
         }
-        val details = MemberDetails.from(
-            MemberDto(member),
-            jwtTokenProvider.tokenValidityInMilliseconds,
-            mutableListOf(SimpleGrantedAuthority("GUEST"))
-        )
-        val authToken = AuthToken(username = member.getUsername(), token = jwtTokenProvider.generateToken(details))
+        val authToken =
+            AuthToken(username = member.getUsername(), token = jwtTokenProvider.generateToken(MemberDto.from(member)))
         return authToken
     }
 

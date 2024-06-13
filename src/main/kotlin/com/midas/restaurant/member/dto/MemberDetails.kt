@@ -8,7 +8,7 @@ import org.springframework.security.core.userdetails.UserDetails
 import java.time.LocalDateTime
 
 class MemberDetails(
-    private val id: Long,
+    val id: Long,
     private val username: String,
     private val password: String,
     private val email: String,
@@ -25,7 +25,8 @@ class MemberDetails(
                 username = memberDto.username,
                 password = memberDto.password,
                 email = memberDto.email,
-                expiredDate = DateUtil.now(),
+                expiredDate = DateUtil.now().plusNanos(expiredTime *  1_000_000),
+                authorities = authorities,
                 createdAt = memberDto.createdAt,
                 updatedAt = memberDto.updatedAt
             )
