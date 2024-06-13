@@ -2,7 +2,7 @@ package com.midas.restaurant.member.service
 
 import com.midas.restaurant.common.contant.ResultStatus
 import com.midas.restaurant.exception.CustomException
-import com.midas.restaurant.member.component.JwtTokenProvider
+import com.midas.restaurant.common.component.JwtTokenProvider
 import com.midas.restaurant.member.domain.Member
 import com.midas.restaurant.member.dto.MemberDetails
 import com.midas.restaurant.member.dto.MemberDto
