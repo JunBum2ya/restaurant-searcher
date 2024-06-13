@@ -63,8 +63,7 @@ class MemberServiceTest : BehaviorSpec({
         every { memberRepository.findMemberByUsername(any(String::class)) }
             .returns(Member(id = 1L, username = "username", password = "password", email = "test@test.com"))
         every { passwordEncoder.matches(any(CharSequence::class), any(String::class)) }.returns(true)
-        every { jwtTokenProvider.tokenValidityInMilliseconds }.returns(1000)
-        every { jwtTokenProvider.generateToken(any(MemberDetails::class)) }.returns("token")
+        every { jwtTokenProvider.generateToken(any(MemberDto::class)) }.returns("token")
         When("로그인을 진행하면") {
             val authToken = memberService.login(username, password)
             Then("인증 데이터가 반환된다.") {
@@ -73,8 +72,7 @@ class MemberServiceTest : BehaviorSpec({
                 authToken.token shouldBe "token"
                 verify { memberRepository.findMemberByUsername(any(String::class)) }
                 verify { passwordEncoder.matches(any(CharSequence::class), any(String::class)) }
-                verify { jwtTokenProvider.tokenValidityInMilliseconds }
-                verify { jwtTokenProvider.generateToken(any(MemberDetails::class)) }
+                verify { jwtTokenProvider.generateToken(any(MemberDto::class)) }
             }
         }
     }

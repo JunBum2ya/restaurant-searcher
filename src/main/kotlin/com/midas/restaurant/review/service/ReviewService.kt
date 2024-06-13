@@ -9,6 +9,8 @@ import com.midas.restaurant.review.dto.ReviewDetailDto
 import com.midas.restaurant.review.repository.ReviewRepository
 import jakarta.persistence.EntityNotFoundException
 import org.slf4j.LoggerFactory
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -20,6 +22,12 @@ class ReviewService(
 ) {
 
     private val log = LoggerFactory.getLogger(ReviewService::class.java)
+
+    @Transactional(readOnly = true)
+    fun searchReviews(pageable: Pageable): Page<ReviewDto> {
+        val page = reviewRepository.findAll(pageable)
+        return page.map { ReviewDto.from(it) }
+    }
 
     @Transactional(readOnly = true)
     fun findReviewDetails(reviewId: Long): ReviewDetailDto {
