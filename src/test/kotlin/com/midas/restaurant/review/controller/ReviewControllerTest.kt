@@ -18,6 +18,10 @@ import io.kotest.core.spec.style.DescribeSpec
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
@@ -34,6 +38,22 @@ class ReviewControllerTest : DescribeSpec({
         .setControllerAdvice(CustomExceptionHandler())
         .setCustomArgumentResolvers(PageableHandlerMethodArgumentResolver(), TestAuthenticationPrincipal())
         .build()
+
+    describe("리뷰 목록 페이지 조회") {
+        context("조회 성공 시") {
+            val page: Page<ReviewDto> = PageImpl(mutableListOf(buildReviewDto()),PageRequest.of(0, 10), 1)
+            every { reviewService.searchReviews(any(Pageable::class)) }.returns(page)
+            it("200 OK") {
+                mvc.perform(get("/api/v1/review"))
+                    .andExpect(status().isOk)
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("code").value(ResultStatus.SUCCESS.code))
+                    .andExpect(jsonPath("message").value(ResultStatus.SUCCESS.message))
+                    .andExpect(jsonPath("data").isMap)
+                verify { reviewService.searchReviews(any(Pageable::class)) }
+            }
+        }
+    }
 
     describe("리뷰 상세 조회 성공 시") {
         every { reviewService.findReviewDetails(any(Long::class)) }
