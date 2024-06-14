@@ -12,7 +12,7 @@ import org.springframework.web.filter.OncePerRequestFilter
 import java.io.IOException
 import kotlin.jvm.Throws
 
-class JwtTokenFilter(private val tokenProvider: JwtTokenProvider): OncePerRequestFilter() {
+class JwtTokenFilter(private val tokenProvider: JwtTokenProvider) : OncePerRequestFilter() {
 
     private val log = LoggerFactory.getLogger(JwtTokenFilter::class.java)
 
@@ -22,19 +22,25 @@ class JwtTokenFilter(private val tokenProvider: JwtTokenProvider): OncePerReques
         response: HttpServletResponse,
         filterChain: FilterChain
     ) {
-        val header = request.getHeader(HttpHeaders.AUTHORIZATION)
-        if (header == null || !header.startsWith("Bearer ")) {
-            log.error("Token is missing in header")
-            filterChain.doFilter(request, response)
-            return
-        }
         try {
-            val token = header.split(" ")[1].trim()
-            val authentication = tokenProvider.extractAuthentication(token)
-            SecurityContextHolder.getContext().authentication = authentication
-        }catch (e: RuntimeException) {
+            resolveToken(request)?.let {
+                val authentication = tokenProvider.extractAuthentication(it)
+                SecurityContextHolder.getContext().authentication = authentication
+            }
+        } catch (e: RuntimeException) {
             log.error("Error occurs during authentication request - {}", e.message)
-            filterChain.doFilter(request, response)
         }
+        filterChain.doFilter(request, response)
+    }
+
+    private fun resolveToken(request: HttpServletRequest): String? {
+        val header = request.getHeader(HttpHeaders.AUTHORIZATION)
+        return if (header == null || !header.startsWith("Bearer ")) {
+            log.error("Token is missing in header")
+            null
+        } else {
+            header.substring(7).trim()
+        }
+
     }
 }

@@ -1,10 +1,8 @@
 package com.midas.restaurant.review.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.midas.restaurant.common.TestAuthenticationPrincipal
-import com.midas.restaurant.common.component.JwtTokenProvider
+import com.midas.restaurant.common.component.TestAuthenticationPrincipal
 import com.midas.restaurant.common.contant.ResultStatus
-import com.midas.restaurant.config.SecurityConfig
 import com.midas.restaurant.exception.CustomException
 import com.midas.restaurant.exception.CustomExceptionHandler
 import com.midas.restaurant.member.dto.MemberDto
@@ -13,7 +11,6 @@ import com.midas.restaurant.review.dto.ReviewDetailDto
 import com.midas.restaurant.review.dto.ReviewDto
 import com.midas.restaurant.review.dto.request.ReviewRequest
 import com.midas.restaurant.review.service.ReviewService
-import io.kotest.core.spec.IsolationMode
 import io.kotest.core.spec.style.DescribeSpec
 import io.mockk.every
 import io.mockk.mockk

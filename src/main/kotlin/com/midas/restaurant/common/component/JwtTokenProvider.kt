@@ -18,6 +18,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Component
 import java.security.Key
+import java.time.LocalDateTime
 import java.util.*
 
 @Component
@@ -43,7 +44,7 @@ class JwtTokenProvider(
         return Jwts.builder()
             .setSubject(details.username)
             .claim(AUTHORITIES_KEY, details.authorities)
-            .claim("DATA", objectMapper.writeValueAsBytes(details))
+            .claim("details", details.serialize())
             .signWith(key, SignatureAlgorithm.HS512)
             .setExpiration(Date(Date().time + tokenValidityInMilliseconds))
             .compact()
@@ -55,8 +56,8 @@ class JwtTokenProvider(
             .build()
             .parseClaimsJws(token)
             .body
-        //val details = objectMapper.readValue(claims["DATA"].toString(), MemberDetails::class.java)
-        return UsernamePasswordAuthenticationToken("gdgaga", "1234")
+        val details = MemberDetails.deserialize(claims["details"].toString())
+        return UsernamePasswordAuthenticationToken(details, details.password)
     }
 
     /**

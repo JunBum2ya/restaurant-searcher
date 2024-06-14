@@ -1,4 +1,4 @@
-package com.midas.restaurant.common
+package com.midas.restaurant.common.component
 
 import com.midas.restaurant.common.util.DateUtil
 import com.midas.restaurant.member.dto.MemberDetails
