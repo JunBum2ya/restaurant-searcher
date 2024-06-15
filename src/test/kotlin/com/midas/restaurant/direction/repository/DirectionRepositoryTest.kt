@@ -2,6 +2,8 @@ package com.midas.restaurant.direction.repository
 
 import com.midas.restaurant.config.JpaConfig
 import com.midas.restaurant.direction.domain.Direction
+import com.midas.restaurant.member.domain.Member
+import com.midas.restaurant.member.repository.MemberRepository
 import com.midas.restaurant.restaurant.domain.Restaurant
 import com.midas.restaurant.restaurant.repository.RestaurantRepository
 import org.assertj.core.api.Assertions.assertThat
@@ -19,7 +21,8 @@ import org.springframework.test.context.ActiveProfiles
 @ActiveProfiles("test")
 class DirectionRepositoryTest(
     @Autowired private val directionRepository: DirectionRepository,
-    @Autowired private val restaurantRepository: RestaurantRepository
+    @Autowired private val restaurantRepository: RestaurantRepository,
+    @Autowired private val memberRepository: MemberRepository
 ) {
 
     @DisplayName("Direction을 저장하면 Direction이 반환된다.")
@@ -77,18 +80,22 @@ class DirectionRepositoryTest(
         assertThat(list).isEmpty()
     }
 
-    private fun createRestaurant() = restaurantRepository.save(
-        Restaurant(
-            address = "경기도",
-            name = "토마토",
-            roadAddressName = "경기도",
-            majorCategory = "일식점",
-            minorCategory = "초밥집",
-            latitude = 10.0,
-            longitude = 10.0,
-            websiteUrl = "",
-            phoneNumber = ""
+    private fun createRestaurant(): Restaurant {
+        val owner = memberRepository.save(Member(username = "test", password = "test", email = "test@test.com"))
+        return restaurantRepository.save(
+            Restaurant(
+                address = "경기도",
+                name = "토마토",
+                roadAddressName = "경기도",
+                majorCategory = "일식점",
+                minorCategory = "초밥집",
+                latitude = 10.0,
+                longitude = 10.0,
+                websiteUrl = "",
+                phoneNumber = "",
+                owner = owner
+            )
         )
-    )
+    }
 
 }

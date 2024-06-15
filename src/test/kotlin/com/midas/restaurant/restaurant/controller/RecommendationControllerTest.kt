@@ -1,5 +1,6 @@
 package com.midas.restaurant.restaurant.controller
 
+import com.midas.restaurant.common.component.TestAuthenticationPrincipal
 import com.midas.restaurant.common.contant.ResultStatus
 import com.midas.restaurant.restaurant.service.RecommendationService
 import io.kotest.core.spec.style.DescribeSpec
@@ -17,10 +18,11 @@ class RecommendationControllerTest : DescribeSpec({
     val recommendationService = mockk<RecommendationService>()
     val recommendationController = RecommendationController(recommendationService)
     val mvc = MockMvcBuilders.standaloneSetup(recommendationController)
+        .setCustomArgumentResolvers(TestAuthenticationPrincipal())
         .build()
 
     describe("[GET] /recommendations - 추천 음식점 조회") {
-        every { recommendationService.recommendRestaurantList(any(String::class)) }.returns(listOf())
+        every { recommendationService.recommendRestaurantList(any(String::class), any(Long::class)) }.returns(listOf())
         it("정상호출") {
             mvc.perform(
                 get("/recommendations")
@@ -28,7 +30,7 @@ class RecommendationControllerTest : DescribeSpec({
             ).andExpect { status().isOk }
                 .andExpect { jsonPath("$.code").value(ResultStatus.SUCCESS.code) }
                 .andExpect(jsonPath("$.message").value(ResultStatus.SUCCESS.message))
-            verify { recommendationService.recommendRestaurantList(any(String::class)) }
+            verify { recommendationService.recommendRestaurantList(any(String::class), any(Long::class)) }
         }
     }
 }) {
