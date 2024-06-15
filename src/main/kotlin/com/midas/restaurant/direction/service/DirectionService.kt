@@ -5,13 +5,18 @@ import com.midas.restaurant.api.dto.response.AddressDocumentResponse
 import com.midas.restaurant.api.dto.response.CategoryDocumentResponse
 import com.midas.restaurant.api.service.KakaoApiService
 import com.midas.restaurant.direction.dto.DirectionWithRestaurantDto
+import com.midas.restaurant.member.repository.MemberRepository
 import com.midas.restaurant.restaurant.dto.RestaurantDto
 import com.midas.restaurant.restaurant.service.RestaurantService
 import org.springframework.stereotype.Service
 import java.util.stream.Collectors
 
 @Service
-class DirectionService(private val restaurantService: RestaurantService, private val kakaoApiService: KakaoApiService) {
+class DirectionService(
+    private val restaurantService: RestaurantService,
+    private val memberRepository: MemberRepository,
+    private val kakaoApiService: KakaoApiService
+) {
     private val MAX_SEARCH_COUNT = 3L // 최대 검색 갯수
     private val RADIUS_KM = 10.0 // 반경 10 km
     private val DIRECTION_BASE_URL = "https://map.kakao.com/link/map/"
@@ -38,7 +43,10 @@ class DirectionService(private val restaurantService: RestaurantService, private
             .collect(Collectors.toList())
     }
 
-    fun buildDirectionListByCategoryApi(documentResponse: AddressDocumentResponse): List<DirectionWithRestaurantDto> {
+    fun buildDirectionListByCategoryApi(
+        documentResponse: AddressDocumentResponse,
+        ownerId: Long
+    ): List<DirectionWithRestaurantDto> {
         val documentList = kakaoApiService.requestCategorySearch(
             documentResponse.latitude,
             documentResponse.longitude,
@@ -50,7 +58,7 @@ class DirectionService(private val restaurantService: RestaurantService, private
             return emptyList()
         }
 
-        val restaurantList = restaurantService.saveRestaurantList(documentList.map { RestaurantDto.from(it) })
+        val restaurantList = restaurantService.saveRestaurantList(documentList.map { RestaurantDto.from(it) }, ownerId)
 
         return restaurantList.stream()
             .map {
