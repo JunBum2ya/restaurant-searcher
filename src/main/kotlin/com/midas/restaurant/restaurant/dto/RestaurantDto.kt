@@ -2,6 +2,7 @@ package com.midas.restaurant.restaurant.dto
 
 import com.midas.restaurant.api.dto.response.CategoryDocumentResponse
 import com.midas.restaurant.common.dto.BaseTimeDto
+import com.midas.restaurant.member.domain.Member
 import com.midas.restaurant.restaurant.domain.Restaurant
 import com.midas.restaurant.restaurant.domain.cache.RestaurantCache
 import java.time.LocalDateTime
@@ -70,8 +71,9 @@ class RestaurantDto(
         }
     }
 
-    fun toEntity(): Restaurant {
+    fun toEntity(owner: Member): Restaurant {
         return Restaurant(
+            owner = owner,
             name = name,
             address = address,
             roadAddressName = roadAddressName,
