@@ -46,7 +46,7 @@ class JwtTokenProvider(
             .claim(AUTHORITIES_KEY, details.authorities)
             .claim("details", details.serialize())
             .signWith(key, SignatureAlgorithm.HS512)
-            .setExpiration(Date(Date().time + tokenValidityInMilliseconds))
+            .setExpiration(DateUtil.convertLocalDateTimeToDate(details.expiredDate))
             .compact()
     }
 
@@ -57,7 +57,7 @@ class JwtTokenProvider(
             .parseClaimsJws(token)
             .body
         val details = MemberDetails.deserialize(claims["details"].toString())
-        return UsernamePasswordAuthenticationToken(details, details.password)
+        return UsernamePasswordAuthenticationToken(details, details.password, details.authorities)
     }
 
     /**

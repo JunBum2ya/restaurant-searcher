@@ -22,6 +22,7 @@ class RecommendationServiceTest : BehaviorSpec({
 
     Given("주소가 주어졌을 때") {
         val address = "경기도"
+        val ownerId = 1L
         val document = CategoryDocumentResponse(
             id = "test",
             placeName = "장강",
@@ -59,7 +60,7 @@ class RecommendationServiceTest : BehaviorSpec({
             )
         )
         When("주소를 기반으로 음식점을 추천하면") {
-            val restaurantList = recommendationService.recommendRestaurantList(address)
+            val restaurantList = recommendationService.recommendRestaurantList(address, ownerId)
             Then("음식점 목록이 반환된다.") {
                 restaurantList.size shouldBe 1
                 verify { kakaoApiService.requestAddressSearch(any(String::class)) }
@@ -68,6 +69,7 @@ class RecommendationServiceTest : BehaviorSpec({
         }
     }
     Given("주소가 주어졌지만 근처의 음식점이 없는 경우") {
+        val ownerId = 1L
         val address = "경기도"
         every { kakaoApiService.requestAddressSearch(any(String::class)) }.returns(
             KakaoApiResponse(
@@ -80,7 +82,7 @@ class RecommendationServiceTest : BehaviorSpec({
         )
         every { directionService.buildDirectionList(any(AddressDocumentResponse::class)) }.returns(listOf())
         When("주소를 기반으로 음식점을 조회를 하면") {
-            val restaurantList = recommendationService.recommendRestaurantList(address)
+            val restaurantList = recommendationService.recommendRestaurantList(address, ownerId)
             Then("빈 리스트가 반환된다.") {
                 restaurantList.isEmpty() shouldBe true
                 verify { kakaoApiService.requestAddressSearch(any(String::class)) }

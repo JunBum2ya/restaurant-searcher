@@ -14,7 +14,7 @@ class RecommendationService(
 
     private val log = LoggerFactory.getLogger(RecommendationService::class.java)
 
-    fun recommendRestaurantList(address: String): List<RestaurantDto> {
+    fun recommendRestaurantList(address: String, ownerId: Long): List<RestaurantDto> {
         val kakaoApiResponse = kakaoApiService.requestAddressSearch(address)
 
         if (kakaoApiResponse == null || kakaoApiResponse.documents.isEmpty()) {
@@ -28,7 +28,7 @@ class RecommendationService(
         return if (directionList.isNotEmpty()) {
             directionList.map { it.restaurant }
         } else {
-            directionService.buildDirectionListByCategoryApi(document).map { it.restaurant }
+            directionService.buildDirectionListByCategoryApi(document, ownerId).map { it.restaurant }
         }
     }
 

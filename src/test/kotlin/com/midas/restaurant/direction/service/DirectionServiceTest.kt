@@ -3,6 +3,8 @@ package com.midas.restaurant.direction.service
 import com.midas.restaurant.api.dto.response.AddressDocumentResponse
 import com.midas.restaurant.api.dto.response.CategoryDocumentResponse
 import com.midas.restaurant.api.service.KakaoApiService
+import com.midas.restaurant.member.repository.MemberRepository
+import com.midas.restaurant.member.service.MemberService
 import com.midas.restaurant.restaurant.dto.RestaurantDto
 import com.midas.restaurant.restaurant.service.RestaurantService
 import io.kotest.core.spec.style.BehaviorSpec
@@ -14,7 +16,8 @@ import io.mockk.verify
 class DirectionServiceTest : BehaviorSpec({
     val restaurantService = mockk<RestaurantService>()
     val kakaoApiService = mockk<KakaoApiService>()
-    val directionService = DirectionService(restaurantService, kakaoApiService)
+    val memberRepository = mockk<MemberRepository>()
+    val directionService = DirectionService(restaurantService, memberRepository, kakaoApiService)
 
     val inputLatitude = 37.5960650456809
     val inputLongitude = 127.037033003036

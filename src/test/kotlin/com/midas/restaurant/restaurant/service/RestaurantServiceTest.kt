@@ -1,5 +1,7 @@
 package com.midas.restaurant.restaurant.service
 
+import com.midas.restaurant.member.domain.Member
+import com.midas.restaurant.member.repository.MemberRepository
 import com.midas.restaurant.restaurant.domain.Restaurant
 import com.midas.restaurant.restaurant.domain.cache.RestaurantCache
 import com.midas.restaurant.restaurant.repository.RestaurantRedisRepository
@@ -15,7 +17,8 @@ class RestaurantServiceTest : BehaviorSpec({
 
     val restaurantRepository = mockk<RestaurantRepository>()
     val restaurantRedisRepository = mockk<RestaurantRedisRepository>()
-    val restaurantService = RestaurantService(restaurantRepository, restaurantRedisRepository)
+    val memberRepository = mockk<MemberRepository>()
+    val restaurantService = RestaurantService(restaurantRepository, restaurantRedisRepository, memberRepository)
 
     Given("아무것도 주어지지 않았고 캐시에 데이터가 없을 때") {
         val restaurant = Restaurant(
@@ -26,7 +29,8 @@ class RestaurantServiceTest : BehaviorSpec({
             latitude = 0.0,
             longitude = 0.0,
             phoneNumber = "test",
-            websiteUrl = "test"
+            websiteUrl = "test",
+            owner = Member(1L, "master", "1234", "master@midas.com"),
         )
         every { restaurantRepository.findAll() } returns listOf(restaurant)
         every { restaurantRedisRepository.findAll() }.returns(emptyList())

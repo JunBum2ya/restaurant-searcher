@@ -33,6 +33,7 @@ class ReviewRepositoryTest(
 
     @BeforeEach
     fun saveRestaurant() {
+        val owner = memberRepository.save(Member(username = "test", password = "1234", email = "test@test.com"))
         val data = Restaurant(
             name = "test",
             address = "test",
@@ -40,14 +41,15 @@ class ReviewRepositoryTest(
             latitude = 0.0,
             longitude = 0.0,
             phoneNumber = "test",
-            websiteUrl = "test"
+            websiteUrl = "test",
+            owner = owner
         )
         this.restaurant = restaurantRepository.save(data)
     }
 
     @BeforeEach
     fun saveMember() {
-        val data = Member(username = "test", password = "test", email = "test@test.com")
+        val data = Member(username = "test1", password = "test", email = "test@test.com")
         this.member = memberRepository.save(data)
     }
 

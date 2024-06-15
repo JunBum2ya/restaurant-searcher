@@ -1,9 +1,12 @@
 package com.midas.restaurant.restaurant.repository
 
 import com.midas.restaurant.config.JpaConfig
+import com.midas.restaurant.member.domain.Member
+import com.midas.restaurant.member.repository.MemberRepository
 import com.midas.restaurant.restaurant.domain.Restaurant
 import io.kotest.core.spec.style.BehaviorSpec
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -17,7 +20,17 @@ import org.springframework.test.context.ActiveProfiles
 @DataJpaTest
 @ActiveProfiles("test")
 @Import(JpaConfig::class)
-class RestaurantRepositoryTest(@Autowired private val restaurantRepository: RestaurantRepository) {
+class RestaurantRepositoryTest(
+    @Autowired private val restaurantRepository: RestaurantRepository,
+    @Autowired private val memberRepository: MemberRepository
+) {
+
+    private var owner: Member? = null
+
+    @BeforeEach
+    fun saveOwner() {
+        this.owner = memberRepository.save(Member(username = "test", password = "test", email = "test@test.com"))
+    }
 
     @DisplayName("음식점 저장 기능")
     @Test
@@ -32,7 +45,8 @@ class RestaurantRepositoryTest(@Autowired private val restaurantRepository: Rest
             latitude = 10.0,
             longitude = 10.0,
             websiteUrl = "",
-            phoneNumber = ""
+            phoneNumber = "",
+            owner = owner!!
         )
         //when
         val savedRestaurant = restaurantRepository.save(restaurant)
@@ -61,7 +75,8 @@ class RestaurantRepositoryTest(@Autowired private val restaurantRepository: Rest
                 latitude = 10.0,
                 longitude = 10.0,
                 websiteUrl = "",
-                phoneNumber = ""
+                phoneNumber = "",
+                owner = owner!!
             ),
             Restaurant(
                 address = "경기도",
@@ -72,7 +87,8 @@ class RestaurantRepositoryTest(@Autowired private val restaurantRepository: Rest
                 latitude = 10.0,
                 longitude = 10.0,
                 websiteUrl = "",
-                phoneNumber = ""
+                phoneNumber = "",
+                owner = owner!!
             )
         )
         //when
@@ -95,7 +111,8 @@ class RestaurantRepositoryTest(@Autowired private val restaurantRepository: Rest
                 latitude = 10.0,
                 longitude = 10.0,
                 websiteUrl = "",
-                phoneNumber = ""
+                phoneNumber = "",
+                owner = owner!!
             ),
             Restaurant(
                 address = "경기도",
@@ -106,7 +123,8 @@ class RestaurantRepositoryTest(@Autowired private val restaurantRepository: Rest
                 latitude = 10.0,
                 longitude = 10.0,
                 websiteUrl = "",
-                phoneNumber = ""
+                phoneNumber = "",
+                owner = owner!!
             )
         )
         restaurantRepository.saveAllAndFlush(restaurantList)
@@ -132,7 +150,8 @@ class RestaurantRepositoryTest(@Autowired private val restaurantRepository: Rest
                 latitude = 10.0,
                 longitude = 10.0,
                 websiteUrl = "",
-                phoneNumber = ""
+                phoneNumber = "",
+                owner = owner!!
             )
         ).getId() ?: -1L
         //when

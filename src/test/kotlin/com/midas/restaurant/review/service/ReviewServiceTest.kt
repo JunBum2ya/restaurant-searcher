@@ -136,7 +136,8 @@ class ReviewServiceTest : BehaviorSpec({
             latitude = 0.0,
             longitude = 0.0,
             phoneNumber = "testPhoneNumber",
-            websiteUrl = "testWebsiteUrl"
+            websiteUrl = "testWebsiteUrl",
+            owner = buildMember()
         )
     }
 }

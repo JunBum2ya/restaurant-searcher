@@ -32,7 +32,7 @@ class MemberDetails(
                 username = memberDto.username,
                 password = memberDto.password,
                 email = memberDto.email,
-                expiredDate = DateUtil.now().plusNanos(expiredTime * 1_000_000),
+                expiredDate = DateUtil.afterMilliseconds(expiredTime),
                 authorities = authorities,
                 createdAt = memberDto.createdAt,
                 updatedAt = memberDto.updatedAt
@@ -47,7 +47,7 @@ class MemberDetails(
                 username = array[1],
                 password = array[2],
                 email = array[3],
-                expiredDate = LocalDateTime.parse(array[4], localDateTimePattern),
+                expiredDate = LocalDateTime.now().plusDays(1L),
                 authorities = array[5].split(",").stream().map { SimpleGrantedAuthority(it) }
                     .collect(Collectors.toList()),
                 createdAt = LocalDateTime.parse(array[6], localDateTimePattern),
@@ -84,7 +84,7 @@ class MemberDetails(
     }
 
     override fun isAccountNonExpired(): Boolean {
-        return expiredDate.isBefore(DateUtil.now())
+        return expiredDate.isAfter(DateUtil.now())
     }
 
     override fun isAccountNonLocked(): Boolean {
@@ -92,7 +92,7 @@ class MemberDetails(
     }
 
     override fun isCredentialsNonExpired(): Boolean {
-        return expiredDate.isBefore(DateUtil.now())
+        return expiredDate.isAfter(DateUtil.now())
     }
 
     override fun isEnabled(): Boolean {
