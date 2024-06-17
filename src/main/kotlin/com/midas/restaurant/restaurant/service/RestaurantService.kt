@@ -6,8 +6,11 @@ import com.midas.restaurant.common.contant.ResultStatus
 import com.midas.restaurant.exception.CustomException
 import com.midas.restaurant.member.repository.MemberRepository
 import com.midas.restaurant.restaurant.domain.Restaurant
+import com.midas.restaurant.restaurant.domain.RestaurantLike
 import com.midas.restaurant.restaurant.domain.cache.RestaurantCache
 import com.midas.restaurant.restaurant.dto.RestaurantDto
+import com.midas.restaurant.restaurant.dto.RestaurantLikeDto
+import com.midas.restaurant.restaurant.repository.RestaurantLikeRepository
 import com.midas.restaurant.restaurant.repository.RestaurantRedisRepository
 import com.midas.restaurant.restaurant.repository.RestaurantRepository
 import jakarta.persistence.EntityNotFoundException
@@ -20,6 +23,7 @@ import kotlin.jvm.Throws
 class RestaurantService(
     private val restaurantRepository: RestaurantRepository,
     private val restaurantRedisRepository: RestaurantRedisRepository,
+    private val restaurantLikeRepository: RestaurantLikeRepository,
     private val memberRepository: MemberRepository
 ) {
 
@@ -71,7 +75,22 @@ class RestaurantService(
             val owner = memberRepository.getReferenceById(ownerId)
             val restaurant = restaurantRepository.save(restaurantDto.toEntity(owner))
             return RestaurantDto.from(restaurant)
-        }catch (e: EntityNotFoundException){
+        } catch (e: EntityNotFoundException) {
+            log.error(e.message)
+            throw CustomException(ResultStatus.ACCESS_NOT_EXIST_ENTITY)
+        }
+    }
+
+    @Transactional
+    fun likeRestaurant(restaurantId: Long, memberId: Long, restaurantLikeDto: RestaurantLikeDto): RestaurantLikeDto {
+        try {
+            val restaurant = restaurantRepository.getReferenceById(restaurantId)
+            val member = memberRepository.getReferenceById(memberId)
+            val restaurantLike = restaurantLikeRepository.findRestaurantLikeByRestaurantAndMember(restaurant, member)
+                ?.update(stars = restaurantLikeDto.stars)
+                ?: restaurantLikeRepository.save(restaurantLikeDto.toEntity(restaurant = restaurant, member = member))
+            return RestaurantLikeDto.from(restaurantLike)
+        } catch (e: EntityNotFoundException) {
             log.error(e.message)
             throw CustomException(ResultStatus.ACCESS_NOT_EXIST_ENTITY)
         }
