@@ -10,11 +10,7 @@ import com.midas.restaurant.restaurant.service.RestaurantService
 import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/v1/restaurant")
@@ -36,7 +32,23 @@ class RestaurantController(private val restaurantService: RestaurantService) {
         @AuthenticationPrincipal memberDetails: MemberDetails
     ): ResponseEntity<CommonResponse<RestaurantLikeResponse>> {
         val restaurantLikeDto = restaurantService.likeRestaurant(restaurantId, memberDetails.id, request.toDto())
-        return ResponseEntity.ok(CommonResponse.of(RestaurantLikeResponse.from(restaurantId = restaurantId, restaurantLikeDto = restaurantLikeDto)))
+        return ResponseEntity.ok(
+            CommonResponse.of(
+                RestaurantLikeResponse.from(
+                    restaurantId = restaurantId,
+                    restaurantLikeDto = restaurantLikeDto
+                )
+            )
+        )
+    }
+
+    @DeleteMapping("/{restaurantId}/likes")
+    fun cancelLikeRestaurant(
+        @PathVariable restaurantId: Long,
+        @AuthenticationPrincipal memberDetails: MemberDetails
+    ): ResponseEntity<CommonResponse<RestaurantLikeResponse>> {
+        val restaurantLike = restaurantService.cancelLikeRestaurant(restaurantId, memberDetails.id)
+        return ResponseEntity.ok(CommonResponse.of(RestaurantLikeResponse.from(restaurantId, restaurantLike)))
     }
 
 }
