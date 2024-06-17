@@ -18,6 +18,7 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import jakarta.persistence.EntityNotFoundException
 
 class RestaurantServiceTest : BehaviorSpec({
 
@@ -195,6 +196,66 @@ class RestaurantServiceTest : BehaviorSpec({
                 verify { restaurantRepository.getReferenceById(any(Long::class)) }
             }
             Then("멤버를 조회한다.") {
+                verify { memberRepository.getReferenceById(any(Long::class)) }
+            }
+        }
+    }
+    Given("member와 restaurant이 모두 저장되었을 경우") {
+        every { restaurantRepository.getReferenceById(any(Long::class)) }.returns(buildRestaurant())
+        every { memberRepository.getReferenceById(any(Long::class)) }.returns(buildMember())
+        When("별점이 등록되어 있는 경우") {
+            every {
+                restaurantLikeRepository.findRestaurantLikeByRestaurantAndMember(
+                    any(Restaurant::class),
+                    any(Member::class)
+                )
+            }.returns(buildRestaurantLike())
+            every { restaurantLikeRepository.delete(any(RestaurantLike::class)) }.returns(Unit)
+            restaurantService.cancelLikeRestaurant(1L, 2L)
+            Then("별점 삭제 로직 실행") {
+                verify { restaurantLikeRepository.delete(any(RestaurantLike::class)) }
+            }
+            Then("음식점 조회 실행") {
+                verify { restaurantRepository.getReferenceById(any(Long::class)) }
+            }
+            Then("멤버 조회 실행") {
+                verify { memberRepository.getReferenceById(any(Long::class)) }
+            }
+        }
+        When("별점이 등록되어 있지 않은 경우") {
+            every {
+                restaurantLikeRepository.findRestaurantLikeByRestaurantAndMember(
+                    any(Restaurant::class),
+                    any(Member::class)
+                )
+            }.returns(null)
+            val exception = shouldThrow<CustomException> { restaurantService.cancelLikeRestaurant(1L, 2L) }
+            Then("정해진 예외 발생") {
+                exception.code shouldBe ResultStatus.ACCESS_NOT_EXIST_ENTITY.code
+                exception.message shouldBe ResultStatus.ACCESS_NOT_EXIST_ENTITY.message
+            }
+            Then("음식점 조회") {
+                verify { restaurantRepository.getReferenceById(any(Long::class)) }
+            }
+            Then("멤버 조회") {
+                verify { memberRepository.getReferenceById(any(Long::class)) }
+            }
+        }
+    }
+    Given("member와 restaurant이 존재하지 않는 경우") {
+        every { restaurantRepository.getReferenceById(any(Long::class)) }.returns(buildRestaurant())
+        every { memberRepository.getReferenceById(any(Long::class)) }.returns(buildMember())
+        When("별점 삭제를 진행한다면") {
+            every { restaurantLikeRepository.findRestaurantLikeByRestaurantAndMember(any(Restaurant::class), any(Member::class)) }
+                .throws(EntityNotFoundException())
+            val exception = shouldThrow<CustomException> { restaurantService.cancelLikeRestaurant(1L, 2L) }
+            Then("정해진 예외가 발생한다.") {
+                exception.code shouldBe ResultStatus.ACCESS_NOT_EXIST_ENTITY.code
+                exception.message shouldBe ResultStatus.ACCESS_NOT_EXIST_ENTITY.message
+            }
+            Then("DB 조회를 한다.") {
+                verify { restaurantLikeRepository.findRestaurantLikeByRestaurantAndMember(any(), any()) }
+                verify { restaurantRepository.getReferenceById(any()) }
                 verify { memberRepository.getReferenceById(any(Long::class)) }
             }
         }

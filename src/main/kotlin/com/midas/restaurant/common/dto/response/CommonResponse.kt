@@ -1,7 +1,9 @@
 package com.midas.restaurant.common.dto.response
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import com.midas.restaurant.common.contant.ResultStatus
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 class CommonResponse<T>(val code: String, val message: String, val data: T? = null) {
     companion object {
         fun <T> of(status: ResultStatus, data: T): CommonResponse<T> {

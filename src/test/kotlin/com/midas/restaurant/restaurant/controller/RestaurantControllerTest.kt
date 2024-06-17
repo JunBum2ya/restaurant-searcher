@@ -15,6 +15,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import org.springframework.http.MediaType
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
@@ -114,6 +115,31 @@ class RestaurantControllerTest : DescribeSpec({
                         any(RestaurantLikeDto::class)
                     )
                 }
+            }
+        }
+    }
+    describe("좋아요 취소 테스트") {
+        val restaurantId = 1L
+        context("좋아요 취소가 성공했을 경우") {
+            every { restaurantService.cancelLikeRestaurant(any(Long::class), any(Long::class)) }
+                .returns(Unit)
+            it("200 OK") {
+                mvc.perform(delete("/api/v1/restaurant/${restaurantId}/likes"))
+                    .andExpect(status().isOk)
+                    .andExpect(jsonPath("code").value(ResultStatus.SUCCESS.code))
+                    .andExpect(jsonPath("message").value(ResultStatus.SUCCESS.message))
+                verify { restaurantService.cancelLikeRestaurant(any(Long::class), any(Long::class)) }
+            }
+        }
+        context("좋아요 취소가 실패했을 경우") {
+            every { restaurantService.cancelLikeRestaurant(any(Long::class), any(Long::class)) }
+                .throws(CustomException(ResultStatus.NOT_VALID_REQUEST))
+            it("404 ERROR") {
+                mvc.perform(delete("/api/v1/restaurant/${restaurantId}/likes"))
+                    .andExpect(status().isBadRequest)
+                    .andExpect(jsonPath("code").value(ResultStatus.NOT_VALID_REQUEST.code))
+                    .andExpect(jsonPath("message").value(ResultStatus.NOT_VALID_REQUEST.message))
+                verify { restaurantService.cancelLikeRestaurant(any(Long::class), any(Long::class)) }
             }
         }
     }

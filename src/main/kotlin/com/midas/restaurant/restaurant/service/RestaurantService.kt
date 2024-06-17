@@ -94,14 +94,13 @@ class RestaurantService(
     }
 
     @Transactional
-    fun cancelLikeRestaurant(restaurantId: Long, memberId: Long): RestaurantLikeDto {
+    fun cancelLikeRestaurant(restaurantId: Long, memberId: Long) {
         try {
             val restaurant = restaurantRepository.getReferenceById(restaurantId)
             val member = memberRepository.getReferenceById(memberId)
             val restaurantLike = restaurantLikeRepository.findRestaurantLikeByRestaurantAndMember(restaurant, member)
                 ?:throw CustomException(ResultStatus.ACCESS_NOT_EXIST_ENTITY)
             restaurantLikeRepository.delete(restaurantLike)
-            return RestaurantLikeDto.from(restaurantLike)
         } catch (e: EntityNotFoundException) {
             log.error(e.message)
             throw CustomException(ResultStatus.ACCESS_NOT_EXIST_ENTITY)

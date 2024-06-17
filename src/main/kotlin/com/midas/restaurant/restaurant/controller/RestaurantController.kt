@@ -1,5 +1,6 @@
 package com.midas.restaurant.restaurant.controller
 
+import com.midas.restaurant.common.contant.ResultStatus
 import com.midas.restaurant.common.dto.response.CommonResponse
 import com.midas.restaurant.member.dto.MemberDetails
 import com.midas.restaurant.restaurant.dto.request.RestaurantLikeRequest
@@ -46,9 +47,9 @@ class RestaurantController(private val restaurantService: RestaurantService) {
     fun cancelLikeRestaurant(
         @PathVariable restaurantId: Long,
         @AuthenticationPrincipal memberDetails: MemberDetails
-    ): ResponseEntity<CommonResponse<RestaurantLikeResponse>> {
-        val restaurantLike = restaurantService.cancelLikeRestaurant(restaurantId, memberDetails.id)
-        return ResponseEntity.ok(CommonResponse.of(RestaurantLikeResponse.from(restaurantId, restaurantLike)))
+    ): ResponseEntity<CommonResponse<Any>> {
+        restaurantService.cancelLikeRestaurant(restaurantId, memberDetails.id)
+        return ResponseEntity.ok(CommonResponse.of(ResultStatus.SUCCESS))
     }
 
 }
