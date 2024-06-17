@@ -18,4 +18,6 @@ class RestaurantLike(
         return this
     }
 
+    fun getId(): Long? = id
+
 }
