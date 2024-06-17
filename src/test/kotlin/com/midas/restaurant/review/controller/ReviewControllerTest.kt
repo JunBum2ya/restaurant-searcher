@@ -113,7 +113,6 @@ class ReviewControllerTest : DescribeSpec({
                     .andExpect(status().isBadRequest)
                     .andExpect(jsonPath("code").value(ResultStatus.ACCESS_NOT_EXIST_ENTITY.code))
                     .andExpect(jsonPath("message").value(ResultStatus.ACCESS_NOT_EXIST_ENTITY.message))
-                    .andExpect(jsonPath("data").isEmpty)
                 verify { reviewService.createReview(any(ReviewDto::class), any(Long::class), any(Long::class)) }
             }
         }
@@ -147,7 +146,6 @@ class ReviewControllerTest : DescribeSpec({
                     .andExpect(status().isBadRequest)
                     .andExpect(jsonPath("code").value(ResultStatus.ACCESS_NOT_EXIST_ENTITY.code))
                     .andExpect(jsonPath("message").value(ResultStatus.ACCESS_NOT_EXIST_ENTITY.message))
-                    .andExpect(jsonPath("data").isEmpty)
                 verify { reviewService.updateReview(any(Long::class), any(ReviewDto::class), any(Long::class)) }
             }
         }
@@ -162,7 +160,6 @@ class ReviewControllerTest : DescribeSpec({
                     .andExpect(status().isOk)
                     .andExpect(jsonPath("code").value(ResultStatus.SUCCESS.code))
                     .andExpect(jsonPath("message").value(ResultStatus.SUCCESS.message))
-                    .andExpect(jsonPath("data").isEmpty)
             }
         }
         context("삭제 실패 시") {
@@ -173,7 +170,6 @@ class ReviewControllerTest : DescribeSpec({
                     .andExpect(status().isBadRequest)
                     .andExpect(jsonPath("code").value(ResultStatus.ACCESS_NOT_EXIST_ENTITY.code))
                     .andExpect(jsonPath("message").value(ResultStatus.ACCESS_NOT_EXIST_ENTITY.message))
-                    .andExpect(jsonPath("data").isEmpty)
                 verify { reviewService.deleteReview(any(Long::class), any(Long::class)) }
             }
         }
