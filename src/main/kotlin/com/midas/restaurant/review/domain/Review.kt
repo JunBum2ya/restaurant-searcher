@@ -14,6 +14,15 @@ class Review(
     @Column(length = 10000) private var content: String,
 ): BaseEntity() {
 
+    @OrderBy("createdAt DESC")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "review", cascade = [(CascadeType.ALL)])
+    private val comments: MutableList<Comment> = mutableListOf()
+
+    fun addComment(comment: Comment) {
+        comment.setReview(this)
+        this.comments.add(comment)
+    }
+
     fun getTitle(): String{
         return title
     }
