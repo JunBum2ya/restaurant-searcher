@@ -23,8 +23,18 @@ class Comment(
         this.childComments.add(comment)
     }
 
+    fun getId(): Long? = id
+    fun getReview(): Review? = review
+    fun getParentCommentId(): Long? = parentCommentId
+    fun getContent(): String = content
+    fun getChildComments() = childComments
+
     fun setReview(review: Review) {
         this.review = review
+    }
+
+    fun update(content: String? = null) {
+        content?.let { this.content = it }
     }
 
 }
