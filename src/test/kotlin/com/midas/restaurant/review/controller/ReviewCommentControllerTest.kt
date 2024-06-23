@@ -26,8 +26,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 
 @WebMvcTest(controllers = [ReviewCommentController::class])
@@ -244,6 +243,73 @@ class ReviewCommentControllerTest(
                         .andExpect(jsonPath("code").value(ResultStatus.NOT_VALID_REQUEST.code))
                         .andExpect(jsonPath("message").exists())
                         .andExpect(jsonPath("data").isArray)
+                }
+            }
+        }
+
+        describe("댓글 업데이트") {
+            val reviewId = 2L
+            val commentId = 1L
+            val request = CommentRequest(content = "test")
+            context("댓글 수정 성공") {
+                every { commentService.updateComment(any(Long::class), any(Long::class), any(CommentDto::class)) }
+                    .returns(CommentDto(id = 1L, content = request.content!!))
+                it("200 OK") {
+                    mvc.perform(put("/api/v1/review/$reviewId/comment/$commentId")
+                        .header("Authorization", "Bearer newtoken")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                        .andExpect(status().isOk)
+                        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                        .andExpect(jsonPath("code").value(ResultStatus.SUCCESS.code))
+                        .andExpect(jsonPath("message").value(ResultStatus.SUCCESS.message))
+                        .andExpect(jsonPath("data.content").value(request.content))
+                    verify { commentService.updateComment(any(Long::class), any(Long::class), any(CommentDto::class)) }
+                }
+            }
+            context("댓글 수정 실패") {
+                every { commentService.updateComment(any(Long::class), any(Long::class), any(CommentDto::class)) }
+                    .throws(CustomException(ResultStatus.ACCESS_NOT_EXIST_ENTITY))
+                it("4XX ERROR") {
+                    mvc.perform(put("/api/v1/review/$reviewId/comment/$commentId")
+                        .header("Authorization", "Bearer newtoken")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                        .andExpect(status().isBadRequest)
+                        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                        .andExpect(jsonPath("code").value(ResultStatus.ACCESS_NOT_EXIST_ENTITY.code))
+                        .andExpect(jsonPath("message").value(ResultStatus.ACCESS_NOT_EXIST_ENTITY.message))
+                    verify { commentService.updateComment(commentId, any(Long::class), any(CommentDto::class)) }
+                }
+            }
+        }
+
+        describe("댓글 삭제") {
+            val reviewId = 1L
+            val commentId = 1L
+            context("댓글 삭제 성공") {
+                every { commentService.deleteComment(any(Long::class), any(Long::class)) }.returns(Unit)
+                it("200 OK") {
+                    mvc.perform(delete("/api/v1/review/${reviewId}/comment/$commentId")
+                        .header("Authorization", "Bearer newtoken"))
+                        .andExpect(status().isOk)
+                        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                        .andExpect(jsonPath("code").value(ResultStatus.SUCCESS.code))
+                        .andExpect(jsonPath("message").value(ResultStatus.SUCCESS.message))
+                    verify { commentService.deleteComment(any(Long::class), any(Long::class)) }
+                }
+            }
+            context("댓글 삭제 실패") {
+                every { commentService.deleteComment(any(Long::class), any(Long::class)) }
+                    .throws(CustomException(ResultStatus.ACCESS_NOT_EXIST_ENTITY))
+                it("4XX ERROR") {
+                    mvc.perform(delete("/api/v1/review/${reviewId}/comment/$commentId")
+                        .header("Authorization", "Bearer newtoken"))
+                        .andExpect(status().isBadRequest)
+                        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                        .andExpect(jsonPath("code").value(ResultStatus.ACCESS_NOT_EXIST_ENTITY.code))
+                        .andExpect(jsonPath("message").value(ResultStatus.ACCESS_NOT_EXIST_ENTITY.message))
+                    verify { commentService.deleteComment(any(Long::class), any(Long::class)) }
                 }
             }
         }
