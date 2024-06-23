@@ -7,6 +7,7 @@ import com.midas.restaurant.exception.CustomException
 import com.midas.restaurant.member.dto.MemberDetails
 import com.midas.restaurant.review.dto.CommentDto
 import com.midas.restaurant.review.dto.request.CommentRequest
+import com.midas.restaurant.review.dto.response.CommentResponse
 import com.midas.restaurant.review.service.CommentService
 import com.ninjasquad.springmockk.MockkBean
 import io.kotest.assertions.print.print
@@ -20,6 +21,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.context.annotation.Import
 import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
@@ -40,10 +43,16 @@ class ReviewCommentControllerTest(
 
         describe("리뷰 댓글 조회") {
             val reviewId = 1L
+            val pageable = PageRequest.of(0, 10)
             context("조회 성공") {
-                every { commentService.searchComments(any(Long::class), any(Pageable::class)) }.returns(Page.empty())
+                val result = PageImpl(mutableListOf<CommentDto>(), pageable, 0L)
+                every { commentService.searchComments(any(Long::class), any(Pageable::class)) }
+                    .returns(result)
                 it("200 OK") {
-                    mvc.perform(get("/api/v1/review/$reviewId/comment"))
+                    mvc.perform(
+                        get("/api/v1/review/$reviewId/comment")
+                            .header("Authorization", "Bearer some_token")
+                    )
                         .andExpect(status().isOk)
                         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                         .andExpect(jsonPath("code").value(ResultStatus.SUCCESS.code))
@@ -56,7 +65,10 @@ class ReviewCommentControllerTest(
                 every { commentService.searchComments(any(Long::class), any(Pageable::class)) }
                     .throws(CustomException(ResultStatus.ACCESS_NOT_EXIST_ENTITY))
                 it("4XX ERROR") {
-                    mvc.perform(get("/api/v1/review/$reviewId/comment"))
+                    mvc.perform(
+                        get("/api/v1/review/$reviewId/comment")
+                            .header("Authorization", "Bearer some_token")
+                    )
                         .andExpect(status().isBadRequest)
                         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                         .andExpect(jsonPath("code").value(ResultStatus.ACCESS_NOT_EXIST_ENTITY.code))
@@ -70,10 +82,14 @@ class ReviewCommentControllerTest(
             val reviewId = 1L
             val commentId = 1L
             context("조회 성공") {
+                val result = PageImpl(mutableListOf<CommentDto>(), PageRequest.of(0, 10), 0L)
                 every { commentService.searchChildComments(any(Long::class), any(Long::class), any(Pageable::class)) }
-                    .returns(Page.empty())
+                    .returns(result)
                 it("200 OK") {
-                    mvc.perform(get("/api/v1/review/$reviewId/comment/$commentId"))
+                    mvc.perform(
+                        get("/api/v1/review/$reviewId/comment/$commentId")
+                            .header("Authorization", "Bearer newtoken")
+                    )
                         .andExpect(status().isOk)
                         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                         .andExpect(jsonPath("code").value(ResultStatus.SUCCESS.code))
@@ -92,7 +108,10 @@ class ReviewCommentControllerTest(
                 every { commentService.searchChildComments(any(Long::class), any(Long::class), any(Pageable::class)) }
                     .throws(CustomException(ResultStatus.ACCESS_NOT_EXIST_ENTITY))
                 it("4XX ERROR") {
-                    mvc.perform(get("/api/v1/review/$reviewId/comment/$commentId"))
+                    mvc.perform(
+                        get("/api/v1/review/$reviewId/comment/$commentId")
+                            .header("Authorization", "Bearer newtoken")
+                    )
                         .andExpect(status().isBadRequest)
                         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                         .andExpect(jsonPath("code").value(ResultStatus.ACCESS_NOT_EXIST_ENTITY.code))
@@ -115,9 +134,12 @@ class ReviewCommentControllerTest(
                 every { commentService.postComment(any(Long::class), any(Long::class), any(CommentDto::class)) }
                     .returns(CommentDto(id = 1L, content = request.content!!))
                 it("200 OK") {
-                    mvc.perform(post("/api/v1/review/$reviewId/comment")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                    mvc.perform(
+                        post("/api/v1/review/$reviewId/comment")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", "Bearer newtoken")
+                            .content(objectMapper.writeValueAsString(request))
+                    )
                         .andExpect(status().isOk)
                         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                         .andExpect(jsonPath("code").value(ResultStatus.SUCCESS.code))
@@ -130,9 +152,12 @@ class ReviewCommentControllerTest(
                 every { commentService.postComment(any(Long::class), any(Long::class), any(CommentDto::class)) }
                     .throws(CustomException(ResultStatus.ACCESS_NOT_EXIST_ENTITY))
                 it("4XX ERROR") {
-                    mvc.perform(post("/api/v1/review/$reviewId/comment")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                    mvc.perform(
+                        post("/api/v1/review/$reviewId/comment")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", "Bearer newtoken")
+                            .content(objectMapper.writeValueAsString(request))
+                    )
                         .andExpect(status().isBadRequest)
                         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                         .andExpect(jsonPath("code").value(ResultStatus.ACCESS_NOT_EXIST_ENTITY.code))
@@ -142,9 +167,12 @@ class ReviewCommentControllerTest(
             }
             context("일부 파라미터 누락 시") {
                 it("400 ERROR") {
-                    mvc.perform(post("/api/v1/review/$reviewId/comment")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(CommentRequest(content = null))))
+                    mvc.perform(
+                        post("/api/v1/review/$reviewId/comment")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", "Bearer newtoken")
+                            .content(objectMapper.writeValueAsString(CommentRequest(content = null)))
+                    )
                         .andExpect(status().isBadRequest)
                         .andExpect(jsonPath("code").value(ResultStatus.NOT_VALID_REQUEST.code))
                         .andExpect(jsonPath("message").exists())
@@ -161,36 +189,57 @@ class ReviewCommentControllerTest(
                 every { commentService.postChildComment(any(Long::class), any(Long::class), any(CommentDto::class)) }
                     .returns(CommentDto(id = 1L, content = request.content!!))
                 it("200 OK") {
-                    mvc.perform(post("/api/v1/review/$reviewId/comment/$commentId")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                    mvc.perform(
+                        post("/api/v1/review/$reviewId/comment/$commentId")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", "Bearer newtoken")
+                            .content(objectMapper.writeValueAsString(request))
+                    )
                         .andExpect(status().isOk)
                         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                         .andExpect(jsonPath("code").value(ResultStatus.SUCCESS.code))
                         .andExpect(jsonPath("message").value(ResultStatus.SUCCESS.message))
                         .andExpect(jsonPath("data.content").value(request.content))
-                    verify { commentService.postChildComment(any(Long::class), any(Long::class), any(CommentDto::class)) }
+                    verify {
+                        commentService.postChildComment(
+                            any(Long::class),
+                            any(Long::class),
+                            any(CommentDto::class)
+                        )
+                    }
                 }
             }
             context("대댓글 작성 실패") {
                 every { commentService.postChildComment(any(Long::class), any(Long::class), any(CommentDto::class)) }
                     .throws(CustomException(ResultStatus.ACCESS_NOT_EXIST_ENTITY))
                 it("4XX ERROR") {
-                    mvc.perform(post("/api/v1/review/$reviewId/comment/$commentId")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                    mvc.perform(
+                        post("/api/v1/review/$reviewId/comment/$commentId")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", "Bearer newtoken")
+                            .content(objectMapper.writeValueAsString(request))
+                    )
                         .andExpect(status().isBadRequest)
                         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                         .andExpect(jsonPath("code").value(ResultStatus.ACCESS_NOT_EXIST_ENTITY.code))
                         .andExpect(jsonPath("message").value(ResultStatus.ACCESS_NOT_EXIST_ENTITY.message))
-                    verify { commentService.postChildComment(any(Long::class), any(Long::class), any(CommentDto::class)) }
+                    verify {
+                        commentService.postChildComment(
+                            any(Long::class),
+                            any(Long::class),
+                            any(CommentDto::class)
+                        )
+                    }
                 }
             }
             context("일부 파라미터 누락 시") {
                 it("400 ERROR") {
-                    mvc.perform(post("/api/v1/review/$reviewId/comment/$commentId")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(CommentRequest(content = null))))
+                    mvc.perform(
+                        post("/api/v1/review/$reviewId/comment/$commentId")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", "Bearer newtoken")
+                            .content(objectMapper.writeValueAsString(CommentRequest(content = null)))
+                    )
                         .andExpect(status().isBadRequest)
                         .andExpect(jsonPath("code").value(ResultStatus.NOT_VALID_REQUEST.code))
                         .andExpect(jsonPath("message").exists())
