@@ -11,6 +11,8 @@ import jakarta.validation.Valid
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
+import org.springframework.data.web.PageableDefault
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
@@ -24,7 +26,7 @@ class ReviewCommentController(private val commentService: CommentService) {
     @GetMapping
     fun searchComments(
         @PathVariable reviewId: Long,
-        pageable: Pageable
+        @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable
     ): ResponseEntity<CommonResponse<Page<CommentResponse>>> {
         val page = commentService.searchComments(reviewId, pageable).map { CommentResponse.from(it) }
         return ResponseEntity.ok(CommonResponse.of(page))
@@ -34,7 +36,7 @@ class ReviewCommentController(private val commentService: CommentService) {
     fun searchChildComments(
         @PathVariable reviewId: Long,
         @PathVariable commentId: Long,
-        pageable: Pageable
+        @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable
     ): ResponseEntity<CommonResponse<Page<CommentResponse>>> {
         val page = commentService.searchChildComments(reviewId, commentId, pageable).map { CommentResponse.from(it) }
         return ResponseEntity.ok(CommonResponse.of(page))
