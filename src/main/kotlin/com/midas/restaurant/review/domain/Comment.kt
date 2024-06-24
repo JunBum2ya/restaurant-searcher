@@ -19,7 +19,7 @@ class Comment(
     private val childComments: MutableList<Comment> = mutableListOf()
 
     fun addChildComment(comment: Comment) {
-        comment.parentCommentId = this.parentCommentId
+        comment.parentCommentId = this.id
         this.childComments.add(comment)
     }
 
