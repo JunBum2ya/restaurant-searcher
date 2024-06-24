@@ -31,6 +31,10 @@ class Review(
         return content
     }
 
+    fun getComments(): List<Comment>{
+        return this.comments
+    }
+
     fun update(title: String? = null, content: String? = null) {
         title?.let { this.title = it }
         content?.let { this.content = it }

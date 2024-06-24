@@ -38,15 +38,9 @@ class CommentService(
         }
     }
 
-    @Throws(CustomException::class)
     @Transactional(readOnly = true)
     fun searchChildComments(reviewId: Long, commentId: Long, pageable: Pageable): Page<CommentDto> {
-        try {
-            return commentRepository.findCommentsByParentCommentId(commentId, pageable).map { CommentDto.from(it) }
-        } catch (e: EntityNotFoundException) {
-            log.error("Not found", e)
-            throw CustomException(ResultStatus.ACCESS_NOT_EXIST_ENTITY)
-        }
+        return commentRepository.findCommentsByParentCommentId(commentId, pageable).map { CommentDto.from(it) }
     }
 
     @Throws(CustomException::class)
