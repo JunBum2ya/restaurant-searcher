@@ -45,6 +45,7 @@ dependencies {
     testImplementation("io.kotest:kotest-property:4.5.0")
     // mockk
     testImplementation("io.mockk:mockk:1.13.8")
+    testImplementation("com.ninja-squad:springmockk:3.1.1")
     // spring retry
     implementation("org.springframework.retry:spring-retry:2.0.6")
     // jwt
