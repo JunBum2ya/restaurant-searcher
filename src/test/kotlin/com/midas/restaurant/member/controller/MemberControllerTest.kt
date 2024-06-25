@@ -33,10 +33,9 @@ class MemberControllerTest : DescribeSpec({
 
     describe("회원가입") {
         every { memberService.join(any(MemberDto::class)) }.returns(
-            MemberDto(
+            AuthToken(
                 username = username,
-                password = password,
-                email = email
+                token = "token"
             )
         )
 
