@@ -13,7 +13,7 @@ import org.springframework.stereotype.Repository
 class MemberRedisRepository(
     redisTemplate: RedisTemplate<String, Any>,
     private val objectMapper: ObjectMapper
-) : RedisRepository<MemberCache, Long> {
+) : RedisRepository<MemberCache, String> {
 
     private val log = LoggerFactory.getLogger(MemberRedisRepository::class.java)
 
@@ -35,9 +35,9 @@ class MemberRedisRepository(
         return entity
     }
 
-    override fun findByIdOrNull(id: Long): MemberCache? {
+    override fun findByIdOrNull(id: String): MemberCache? {
         log.debug("Found entity: {}", id)
-        val entity = hashOperations.get(CACHE_KEY, id.toString())
+        val entity = hashOperations.get(CACHE_KEY, id)
         return entity?.let { deserialize(it) }
     }
 
@@ -52,9 +52,9 @@ class MemberRedisRepository(
             .forEach { hashOperations.delete(CACHE_KEY, it.callId()) }
     }
 
-    override fun deleteById(id: Long) {
+    override fun deleteById(id: String) {
         log.debug("Deleting id: {}", id)
-        hashOperations.delete(CACHE_KEY, id.toString())
+        hashOperations.delete(CACHE_KEY, id)
     }
 
     override fun delete(entity: MemberCache) {

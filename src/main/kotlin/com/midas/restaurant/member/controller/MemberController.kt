@@ -18,9 +18,9 @@ import org.springframework.web.bind.annotation.RestController
 class MemberController(private val memberService: MemberService) {
 
     @PostMapping("join")
-    fun join(@Valid @RequestBody request: MemberJoinRequest): ResponseEntity<CommonResponse<MemberResponse>> {
-        val member = memberService.join(request.toDto())
-        return ResponseEntity.ok(CommonResponse.of(MemberResponse.from(member)))
+    fun join(@Valid @RequestBody request: MemberJoinRequest): ResponseEntity<CommonResponse<MemberAuthResponse>> {
+        val tokenData = memberService.join(request.toDto())
+        return ResponseEntity.ok(CommonResponse.of(MemberAuthResponse.from(tokenData)))
     }
 
     @PostMapping("login")

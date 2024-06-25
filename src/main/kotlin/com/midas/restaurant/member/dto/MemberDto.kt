@@ -1,6 +1,7 @@
 package com.midas.restaurant.member.dto
 
 import com.midas.restaurant.member.domain.Member
+import com.midas.restaurant.member.domain.cache.MemberCache
 import org.springframework.security.crypto.password.PasswordEncoder
 import java.time.LocalDateTime
 
@@ -22,6 +23,17 @@ class MemberDto(
                 member.getEmail(),
                 member.getCreatedAt(),
                 member.getUpdatedAt()
+            )
+        }
+
+        fun from(member: MemberCache): MemberDto {
+            return MemberDto(
+                id = member.id,
+                username = member.username,
+                password = member.password,
+                email = member.email,
+                createdAt = member.createdAt,
+                updatedAt = member.updatedAt
             )
         }
     }
