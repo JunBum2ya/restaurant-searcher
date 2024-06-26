@@ -1,5 +1,6 @@
 package com.midas.restaurant.review.service
 
+import com.midas.restaurant.alarm.service.AlarmService
 import com.midas.restaurant.common.contant.ResultStatus
 import com.midas.restaurant.exception.CustomException
 import com.midas.restaurant.member.domain.Member
@@ -11,6 +12,7 @@ import com.midas.restaurant.review.dto.CommentDto
 import com.midas.restaurant.review.repository.CommentRepository
 import com.midas.restaurant.review.repository.ReviewRepository
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.core.spec.IsolationMode
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
@@ -25,10 +27,14 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
 
 class CommentServiceTest : BehaviorSpec({
+
+    isolationMode = IsolationMode.InstancePerLeaf
+
     val reviewRepository = mockk<ReviewRepository>()
     val memberRepository = mockk<MemberRepository>()
     val commentRepository = mockk<CommentRepository>()
-    val commentService = CommentService(reviewRepository, memberRepository, commentRepository)
+    val alarmService = mockk<AlarmService>()
+    val commentService = CommentService(reviewRepository, memberRepository, commentRepository, alarmService)
 
     Given("리뷰가 저장되어 있을 때") {
         val reviewId = 1L
@@ -167,14 +173,14 @@ class CommentServiceTest : BehaviorSpec({
                 exception.message shouldBe ResultStatus.ACCESS_NOT_EXIST_ENTITY.message
             }
             Then("리뷰를 조회한다.") {
-                verify { reviewRepository.getReferenceById(any(Long::class)) }
+                verify { commentRepository.getReferenceById(any(Long::class)) }
             }
         }
         When("글쓴이가 없을 때 저장한다면") {
             val parentComment = Comment(id = 1L, content = "content", author = buildMember(), review = buildReview())
             every { commentRepository.getReferenceById(any(Long::class)) }.returns(parentComment)
             every { memberRepository.getReferenceById(any(Long::class)) }.throws(EntityNotFoundException())
-            val exception = shouldThrow<CustomException> { commentService.postComment(commentId, authorId, commentDto) }
+            val exception = shouldThrow<CustomException> { commentService.postChildComment(commentId, authorId, commentDto) }
             Then("예외가 발생한다.") {
                 exception.code shouldBe ResultStatus.ACCESS_NOT_EXIST_ENTITY.code
                 exception.message shouldBe ResultStatus.ACCESS_NOT_EXIST_ENTITY.message
@@ -206,7 +212,7 @@ class CommentServiceTest : BehaviorSpec({
                 updatedComment.content shouldBe commentDto.content
             }
             Then("댓글을 조회한다.") {
-                verify { commentRepository.getReferenceById(any(Long::class)) }
+                verify { commentRepository.findByIdOrNull(any(Long::class)) }
             }
         }
         When("댓글이 없다면") {
@@ -218,7 +224,7 @@ class CommentServiceTest : BehaviorSpec({
                 exception.message shouldBe ResultStatus.ACCESS_NOT_EXIST_ENTITY.message
             }
             Then("댓글을 조회한다.") {
-                verify { commentRepository.getReferenceById(any(Long::class)) }
+                verify { commentRepository.findByIdOrNull(any(Long::class)) }
             }
         }
         When("댓글이 접근한 사용자가 쓴 글이 아니라면") {

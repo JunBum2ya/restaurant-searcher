@@ -1,5 +1,6 @@
 package com.midas.restaurant.review.service
 
+import com.midas.restaurant.alarm.service.AlarmService
 import com.midas.restaurant.common.contant.ResultStatus
 import com.midas.restaurant.exception.CustomException
 import com.midas.restaurant.member.repository.MemberRepository
@@ -20,7 +21,8 @@ import kotlin.jvm.Throws
 class CommentService(
     private val reviewRepository: ReviewRepository,
     private val memberRepository: MemberRepository,
-    private val commentRepository: CommentRepository
+    private val commentRepository: CommentRepository,
+    private val alarmService: AlarmService
 ) {
 
     private val log = LoggerFactory.getLogger(this::class.java)

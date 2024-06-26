@@ -33,6 +33,8 @@ jwt:
   header: Authorization
   secret: ${JWT_SECRET}
   access-token-validity-in-seconds: 1800
+sse:
+  timeout: 1800
 
 ---
 

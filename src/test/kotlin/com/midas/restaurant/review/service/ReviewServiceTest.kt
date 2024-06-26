@@ -1,5 +1,6 @@
 package com.midas.restaurant.review.service
 
+import com.midas.restaurant.alarm.service.AlarmService
 import com.midas.restaurant.common.contant.ResultStatus
 import com.midas.restaurant.exception.CustomException
 import com.midas.restaurant.member.domain.Member
@@ -11,6 +12,7 @@ import com.midas.restaurant.review.dto.ReviewDetailDto
 import com.midas.restaurant.review.dto.ReviewDto
 import com.midas.restaurant.review.repository.ReviewRepository
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.core.spec.IsolationMode
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
@@ -25,10 +27,13 @@ import org.springframework.data.domain.Pageable
 
 class ReviewServiceTest : BehaviorSpec({
 
+    isolationMode = IsolationMode.InstancePerLeaf
+
     val reviewRepository = mockk<ReviewRepository>()
     val memberRepository = mockk<MemberRepository>()
     val restaurantRepository = mockk<RestaurantRepository>()
-    val reviewService = ReviewService(reviewRepository, memberRepository, restaurantRepository)
+    val alarmService = mockk<AlarmService>()
+    val reviewService = ReviewService(reviewRepository, memberRepository, restaurantRepository, alarmService)
 
     Given("pageable이 주어졌을 때") {
         val pageable = PageRequest.of(0, 10)
