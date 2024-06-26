@@ -18,6 +18,7 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import kotlin.jvm.Throws
 
 @Service
 class ReviewService(
@@ -46,6 +47,7 @@ class ReviewService(
         }
     }
 
+    @Throws(CustomException::class)
     @Transactional
     fun createReview(reviewDto: ReviewDto, authorId: Long, restaurantId: Long): ReviewDto {
         val author = memberRepository.findByIdOrNull(authorId)

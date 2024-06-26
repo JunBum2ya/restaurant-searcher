@@ -1,7 +1,9 @@
 package com.midas.restaurant.review.service
 
+import com.midas.restaurant.alarm.domain.contant.AlarmType
 import com.midas.restaurant.alarm.service.AlarmService
 import com.midas.restaurant.common.contant.ResultStatus
+import com.midas.restaurant.config.TestJwtTokenProvider
 import com.midas.restaurant.exception.CustomException
 import com.midas.restaurant.member.domain.Member
 import com.midas.restaurant.member.repository.MemberRepository
@@ -24,6 +26,7 @@ import jakarta.persistence.EntityNotFoundException
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
+import org.springframework.data.repository.findByIdOrNull
 
 class ReviewServiceTest : BehaviorSpec({
 
@@ -61,10 +64,83 @@ class ReviewServiceTest : BehaviorSpec({
         }
         When("존재하지 않는 리뷰를 상세 조회를 하면") {
             every { reviewRepository.getReferenceById(any(Long::class)) } throws EntityNotFoundException()
-            val exception = shouldThrow<CustomException> { reviewService.findReviewDetails(reviewId)}
+            val exception = shouldThrow<CustomException> { reviewService.findReviewDetails(reviewId) }
             Then("예외가 발생한다.") {
                 exception.code shouldBe ResultStatus.ACCESS_NOT_EXIST_ENTITY.code
                 exception.message shouldBe ResultStatus.ACCESS_NOT_EXIST_ENTITY.message
+            }
+        }
+    }
+    Given("글쓴이 아이디와 음식점 아이디 그리고 리뷰 데이터가 주어졌을 때") {
+        val authorId = 1L
+        val restaurantId = 10L
+        val reviewData = ReviewDto(title = "title", content = "content")
+        every { alarmService.send(any(String::class), any(AlarmType::class), any(String::class)) }.returns(Unit)
+        every { reviewRepository.save(any(Review::class)) } returns buildReview()
+        When("음식점과 글쓴이가 모두 있어 저장한다면") {
+            every { restaurantRepository.findByIdOrNull(any(Long::class)) } returns buildRestaurant()
+            every { memberRepository.findByIdOrNull(any(Long::class)) } returns buildMember()
+            every { alarmService.send(any(String::class), any(AlarmType::class), any(String::class)) } returns Unit
+            val review = reviewService.createReview(reviewData, authorId, restaurantId)
+            Then("저장된 데이터가 반환된다.") {
+                review.title shouldBe "title"
+                review.content shouldBe "content"
+            }
+            Then("음식점을 조회한다.") {
+                verify { restaurantRepository.findByIdOrNull(any(Long::class)) }
+            }
+            Then("글쓴이를 조회한다.") {
+                verify { memberRepository.findByIdOrNull(any(Long::class)) }
+            }
+            Then("알람이 전송된다.") {
+                verify { alarmService.send(any(String::class), any(AlarmType::class), any(String::class)) }
+            }
+        }
+        When("음식점이 DB에 없을 때 저장을 한다면") {
+            every { memberRepository.findByIdOrNull(any(Long::class)) } returns buildMember()
+            every { restaurantRepository.findByIdOrNull(any(Long::class)) } returns null
+            val exception =
+                shouldThrow<CustomException> { reviewService.createReview(reviewData, authorId, restaurantId) }
+            Then("예외가 발생한다.") {
+                exception.code shouldBe ResultStatus.ACCESS_NOT_EXIST_ENTITY.code
+                exception.message shouldBe ResultStatus.ACCESS_NOT_EXIST_ENTITY.message
+            }
+            Then("글쓴이를 조회한다.") {
+                verify { memberRepository.findByIdOrNull(any(Long::class)) }
+            }
+            Then("음식점을 조회한다.") {
+                verify { restaurantRepository.findByIdOrNull(any(Long::class)) }
+            }
+        }
+        When("글쓴이가 DB에 없을 때 저장을 한다면") {
+            every { memberRepository.findByIdOrNull(any(Long::class)) } returns null
+            val exception = shouldThrow<CustomException> { reviewService.createReview(reviewData, authorId, restaurantId) }
+            Then("예외가 발생한다.") {
+                exception.code shouldBe ResultStatus.ACCESS_NOT_EXIST_ENTITY.code
+                exception.message shouldBe ResultStatus.ACCESS_NOT_EXIST_ENTITY.message
+            }
+            Then("글쓴이를 조회한다.") {
+                verify { memberRepository.findByIdOrNull(any(Long::class)) }
+            }
+        }
+        When("알람 전송중에 오류가 발생했다면") {
+            every { restaurantRepository.findByIdOrNull(any(Long::class)) } returns buildRestaurant()
+            every { memberRepository.findByIdOrNull(any(Long::class)) } returns buildMember()
+            every { alarmService.send(any(String::class), any(AlarmType::class), any(String::class)) }
+                .throws(CustomException(ResultStatus.OCCUR_ALARM_ERROR))
+            val exception = shouldThrow<CustomException> { reviewService.createReview(reviewData, authorId, restaurantId) }
+            Then("예외가 발생한다.") {
+                exception.code shouldBe ResultStatus.OCCUR_ALARM_ERROR.code
+                exception.message shouldBe ResultStatus.OCCUR_ALARM_ERROR.message
+            }
+            Then("음식점을 조회한다.") {
+                verify { restaurantRepository.findByIdOrNull(any(Long::class)) }
+            }
+            Then("글쓴이를 조회한다.") {
+                verify { memberRepository.findByIdOrNull(any(Long::class)) }
+            }
+            Then("알람을 전송한다.") {
+                verify { alarmService.send(any(String::class), any(AlarmType::class), any(String::class)) }
             }
         }
     }
@@ -132,6 +208,7 @@ class ReviewServiceTest : BehaviorSpec({
             title = "title",
             content = "content"
         )
+
         private fun buildMember() = Member(id = 1L, username = "testUser", password = "1234", email = "test@test.com")
         private fun buildRestaurant() = Restaurant(
             id = 1L,
