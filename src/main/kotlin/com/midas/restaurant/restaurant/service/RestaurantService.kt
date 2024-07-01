@@ -11,6 +11,8 @@ import com.midas.restaurant.restaurant.repository.RestaurantRedisRepository
 import com.midas.restaurant.restaurant.repository.RestaurantRepository
 import jakarta.persistence.EntityNotFoundException
 import org.slf4j.LoggerFactory
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.servlet.View
@@ -25,6 +27,11 @@ class RestaurantService(
 ) {
 
     private val log = LoggerFactory.getLogger(RestaurantService::class.java)
+
+    @Transactional(readOnly = true)
+    fun searchRestaurantDtoList(pageable: Pageable): Page<RestaurantDto> {
+        return restaurantRepository.findAll(pageable).map { RestaurantDto.from(it) }
+    }
 
     @Transactional(readOnly = true)
     fun searchRestaurantDtoList(): List<RestaurantDto> {
@@ -99,7 +106,7 @@ class RestaurantService(
             val restaurant = restaurantRepository.getReferenceById(restaurantId)
             val member = memberRepository.getReferenceById(memberId)
             val restaurantLike = restaurantLikeRepository.findRestaurantLikeByRestaurantAndMember(restaurant, member)
-                ?:throw CustomException(ResultStatus.ACCESS_NOT_EXIST_ENTITY)
+                ?: throw CustomException(ResultStatus.ACCESS_NOT_EXIST_ENTITY)
             restaurantLikeRepository.delete(restaurantLike)
         } catch (e: EntityNotFoundException) {
             log.error(e.message)

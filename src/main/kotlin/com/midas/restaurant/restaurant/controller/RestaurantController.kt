@@ -9,6 +9,10 @@ import com.midas.restaurant.restaurant.dto.response.RestaurantLikeResponse
 import com.midas.restaurant.restaurant.dto.response.RestaurantResponse
 import com.midas.restaurant.restaurant.service.RestaurantService
 import jakarta.validation.Valid
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
+import org.springframework.data.web.PageableDefault
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
@@ -16,6 +20,18 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/api/v1/restaurant")
 class RestaurantController(private val restaurantService: RestaurantService) {
+
+    @GetMapping
+    fun searchRestaurant(
+        @PageableDefault(
+            size = 10,
+            sort = ["createdAt"],
+            direction = Sort.Direction.DESC
+        ) pageable: Pageable
+    ): ResponseEntity<CommonResponse<Page<RestaurantResponse>>> {
+        val page = restaurantService.searchRestaurantDtoList(pageable).map { RestaurantResponse.from(it) }
+        return ResponseEntity.ok(CommonResponse.of(page))
+    }
 
     @PostMapping
     fun createRestaurant(
