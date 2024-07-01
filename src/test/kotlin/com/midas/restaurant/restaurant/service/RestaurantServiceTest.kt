@@ -14,11 +14,14 @@ import com.midas.restaurant.restaurant.repository.RestaurantRepository
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.IsolationMode
 import io.kotest.core.spec.style.BehaviorSpec
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import jakarta.persistence.EntityNotFoundException
+import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.PageRequest
 
 class RestaurantServiceTest : BehaviorSpec({
 
@@ -30,6 +33,21 @@ class RestaurantServiceTest : BehaviorSpec({
     val restaurantLikeRepository = mockk<RestaurantLikeRepository>()
     val restaurantService =
         RestaurantService(restaurantRepository, restaurantRedisRepository, restaurantLikeRepository, memberRepository)
+
+    Given("pageable이 주어졌을 때") {
+        val pageable = PageRequest.of(0, 10)
+        every { restaurantRepository.findAll(pageable) } returns PageImpl(listOf(buildRestaurant()), pageable, 1L)
+        When("음식점을 조회한다면") {
+            val page = restaurantService.searchRestaurantDtoList(pageable)
+            Then("음식점 페이지가 반환된다.") {
+                page.content shouldHaveSize 1
+                page.size shouldBe 10
+            }
+            Then("음식점을 조회한다.") {
+                verify { restaurantRepository.findAll(pageable) }
+            }
+        }
+    }
 
     Given("아무것도 주어지지 않았고 캐시에 데이터가 없을 때") {
         val restaurant = Restaurant(
@@ -246,7 +264,12 @@ class RestaurantServiceTest : BehaviorSpec({
         every { restaurantRepository.getReferenceById(any(Long::class)) }.returns(buildRestaurant())
         every { memberRepository.getReferenceById(any(Long::class)) }.returns(buildMember())
         When("별점 삭제를 진행한다면") {
-            every { restaurantLikeRepository.findRestaurantLikeByRestaurantAndMember(any(Restaurant::class), any(Member::class)) }
+            every {
+                restaurantLikeRepository.findRestaurantLikeByRestaurantAndMember(
+                    any(Restaurant::class),
+                    any(Member::class)
+                )
+            }
                 .throws(EntityNotFoundException())
             val exception = shouldThrow<CustomException> { restaurantService.cancelLikeRestaurant(1L, 2L) }
             Then("정해진 예외가 발생한다.") {

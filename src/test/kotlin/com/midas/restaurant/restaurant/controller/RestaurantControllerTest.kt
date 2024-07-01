@@ -5,6 +5,7 @@ import com.midas.restaurant.common.component.TestAuthenticationPrincipal
 import com.midas.restaurant.common.contant.ResultStatus
 import com.midas.restaurant.exception.CustomException
 import com.midas.restaurant.exception.CustomExceptionHandler
+import com.midas.restaurant.restaurant.domain.Restaurant
 import com.midas.restaurant.restaurant.dto.RestaurantDto
 import com.midas.restaurant.restaurant.dto.RestaurantLikeDto
 import com.midas.restaurant.restaurant.dto.request.RestaurantLikeRequest
@@ -14,11 +15,14 @@ import io.kotest.core.spec.style.DescribeSpec
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Pageable
+import org.springframework.data.web.PageableHandlerMethodArgumentResolver
 import org.springframework.http.MediaType
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 
 class RestaurantControllerTest : DescribeSpec({
@@ -28,8 +32,24 @@ class RestaurantControllerTest : DescribeSpec({
     val objectMapper = ObjectMapper()
     val mvc = MockMvcBuilders
         .standaloneSetup(restaurantController, CustomExceptionHandler())
-        .setCustomArgumentResolvers(TestAuthenticationPrincipal())
+        .setCustomArgumentResolvers(TestAuthenticationPrincipal(),PageableHandlerMethodArgumentResolver())
         .build()
+
+    describe("음식점 조회 API 테스트") {
+        val page = PageImpl<RestaurantDto>(listOf(), PageRequest.of(0, 10), 0)
+        every { restaurantService.searchRestaurantDtoList(any(Pageable::class)) } returns page
+        context("정상적으로 API 조회") {
+            it("200 OK") {
+                mvc.perform(get("/api/v1/restaurant"))
+                    .andExpect(status().isOk)
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("code").value(ResultStatus.SUCCESS.code))
+                    .andExpect(jsonPath("message").value(ResultStatus.SUCCESS.message))
+                    .andExpect(jsonPath("data.size").value(10))
+                verify { restaurantService.searchRestaurantDtoList(any(Pageable::class)) }
+            }
+        }
+    }
 
     describe("음식점 저장 API 테스트") {
         context("정상적으로 음식점을 저장") {
