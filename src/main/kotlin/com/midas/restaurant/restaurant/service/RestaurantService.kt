@@ -3,7 +3,9 @@ package com.midas.restaurant.restaurant.service
 import com.midas.restaurant.common.contant.ResultStatus
 import com.midas.restaurant.exception.CustomException
 import com.midas.restaurant.member.repository.MemberRepository
+import com.midas.restaurant.restaurant.domain.Restaurant
 import com.midas.restaurant.restaurant.domain.cache.RestaurantCache
+import com.midas.restaurant.restaurant.dto.RestaurantDetailDto
 import com.midas.restaurant.restaurant.dto.RestaurantDto
 import com.midas.restaurant.restaurant.dto.RestaurantLikeDto
 import com.midas.restaurant.restaurant.repository.RestaurantLikeRepository
@@ -57,6 +59,11 @@ class RestaurantService(
         } else {
             restaurantCacheList.map { RestaurantDto.from(it) }
         }
+    }
+
+    @Transactional(readOnly = true)
+    fun findRestaurantById(id: Long): RestaurantDetailDto {
+        return restaurantRepository.findRestaurantWithLikeAverage(id)
     }
 
     @Throws(CustomException::class)

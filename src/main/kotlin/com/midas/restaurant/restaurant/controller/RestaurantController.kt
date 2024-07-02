@@ -3,8 +3,10 @@ package com.midas.restaurant.restaurant.controller
 import com.midas.restaurant.common.contant.ResultStatus
 import com.midas.restaurant.common.dto.response.CommonResponse
 import com.midas.restaurant.member.dto.MemberDetails
+import com.midas.restaurant.restaurant.dto.RestaurantDetailDto
 import com.midas.restaurant.restaurant.dto.request.RestaurantLikeRequest
 import com.midas.restaurant.restaurant.dto.request.RestaurantRequest
+import com.midas.restaurant.restaurant.dto.response.RestaurantDetailResponse
 import com.midas.restaurant.restaurant.dto.response.RestaurantLikeResponse
 import com.midas.restaurant.restaurant.dto.response.RestaurantResponse
 import com.midas.restaurant.restaurant.service.RestaurantService
@@ -31,6 +33,12 @@ class RestaurantController(private val restaurantService: RestaurantService) {
     ): ResponseEntity<CommonResponse<Page<RestaurantResponse>>> {
         val page = restaurantService.searchRestaurantDtoList(pageable).map { RestaurantResponse.from(it) }
         return ResponseEntity.ok(CommonResponse.of(page))
+    }
+
+    @GetMapping("/{id}")
+    fun getRestaurant(@PathVariable id: Long): ResponseEntity<CommonResponse<RestaurantDetailResponse>> {
+        val restaurant = restaurantService.findRestaurantById(id)
+        return ResponseEntity.ok(CommonResponse.of(RestaurantDetailResponse.from(restaurant)))
     }
 
     @PostMapping

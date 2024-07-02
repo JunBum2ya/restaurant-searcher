@@ -6,6 +6,7 @@ import com.midas.restaurant.common.contant.ResultStatus
 import com.midas.restaurant.exception.CustomException
 import com.midas.restaurant.exception.CustomExceptionHandler
 import com.midas.restaurant.restaurant.domain.Restaurant
+import com.midas.restaurant.restaurant.dto.RestaurantDetailDto
 import com.midas.restaurant.restaurant.dto.RestaurantDto
 import com.midas.restaurant.restaurant.dto.RestaurantLikeDto
 import com.midas.restaurant.restaurant.dto.request.RestaurantLikeRequest
@@ -24,6 +25,7 @@ import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
+import java.time.LocalDateTime
 
 class RestaurantControllerTest : DescribeSpec({
 
@@ -32,7 +34,7 @@ class RestaurantControllerTest : DescribeSpec({
     val objectMapper = ObjectMapper()
     val mvc = MockMvcBuilders
         .standaloneSetup(restaurantController, CustomExceptionHandler())
-        .setCustomArgumentResolvers(TestAuthenticationPrincipal(),PageableHandlerMethodArgumentResolver())
+        .setCustomArgumentResolvers(TestAuthenticationPrincipal(), PageableHandlerMethodArgumentResolver())
         .build()
 
     describe("음식점 조회 API 테스트") {
@@ -47,6 +49,32 @@ class RestaurantControllerTest : DescribeSpec({
                     .andExpect(jsonPath("message").value(ResultStatus.SUCCESS.message))
                     .andExpect(jsonPath("data.size").value(10))
                 verify { restaurantService.searchRestaurantDtoList(any(Pageable::class)) }
+            }
+        }
+    }
+
+    describe("음식점 상세 조회 API 테스트") {
+        val restaurantId = 1L
+        every { restaurantService.findRestaurantById(restaurantId) } returns RestaurantDetailDto(
+            id = 1L,
+            name = "test",
+            address = "test",
+            roadAddressName = "test",
+            phoneNumber = "test",
+            websiteUrl = "test",
+            latitude = 0.0,
+            longitude = 0.0,
+            likes = 3.5,
+            createdAt = LocalDateTime.now(),
+            updatedAt = LocalDateTime.now()
+        )
+        context("정상적으로 API 조회") {
+            it("200 OK") {
+                mvc.perform(get("/api/v1/restaurant/${restaurantId}"))
+                    .andExpect(status().isOk)
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("data.likes").value(3.5))
+                verify { restaurantService.findRestaurantById(restaurantId) }
             }
         }
     }

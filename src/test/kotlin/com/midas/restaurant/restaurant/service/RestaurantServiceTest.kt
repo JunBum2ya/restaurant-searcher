@@ -7,6 +7,7 @@ import com.midas.restaurant.member.repository.MemberRepository
 import com.midas.restaurant.restaurant.domain.Restaurant
 import com.midas.restaurant.restaurant.domain.RestaurantLike
 import com.midas.restaurant.restaurant.domain.cache.RestaurantCache
+import com.midas.restaurant.restaurant.dto.RestaurantDetailDto
 import com.midas.restaurant.restaurant.dto.RestaurantLikeDto
 import com.midas.restaurant.restaurant.repository.RestaurantLikeRepository
 import com.midas.restaurant.restaurant.repository.RestaurantRedisRepository
@@ -22,6 +23,7 @@ import io.mockk.verify
 import jakarta.persistence.EntityNotFoundException
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
+import java.time.LocalDateTime
 
 class RestaurantServiceTest : BehaviorSpec({
 
@@ -102,6 +104,29 @@ class RestaurantServiceTest : BehaviorSpec({
             Then("레스토랑 리스트가 반환된다.") {
                 restaurantList.size shouldBe 1
                 verify { restaurantRedisRepository.findAll() }
+            }
+        }
+    }
+    Given("음식점 아이디가 주어졌을 때") {
+        val restaurantId = 1L
+        every { restaurantRepository.findRestaurantWithLikeAverage(any(Long::class)) } returns RestaurantDetailDto(
+            id = 1L,
+            name = "test",
+            address = "test",
+            roadAddressName = "test",
+            phoneNumber = "test",
+            websiteUrl = "test",
+            latitude = 0.0,
+            longitude = 0.0,
+            likes = 3.5
+        )
+        When("상세 조회를 하였을 경우") {
+            val restaurant = restaurantService.findRestaurantById(restaurantId)
+            Then("좋아요가 포함된다.") {
+                restaurant.likes shouldBe 3.5
+            }
+            Then("조회를 실행한다.") {
+                verify { restaurantRepository.findRestaurantWithLikeAverage(any(Long::class)) }
             }
         }
     }
