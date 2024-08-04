@@ -42,3 +42,6 @@ out/
 ### docker ###
 .env.dev
 .env
+
+### SSL ###
+*.p12
