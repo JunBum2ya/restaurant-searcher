@@ -17,14 +17,4 @@ class RestTemplateConfig {
         return RestTemplate()
     }
 
-    @Bean
-    fun initializeRedis(redisTemplate: RedisTemplate<String, Any>, connectionFactory: RedisConnectionFactory): CommandLineRunner {
-        val redisConnection = connectionFactory.connection
-        val redisSerializer = redisTemplate.keySerializer as RedisSerializer<String>
-        return CommandLineRunner {
-            val defaultRedisConnection = DefaultStringRedisConnection(redisConnection,redisSerializer)
-            defaultRedisConnection.flushAll()
-        }
-    }
-
 }

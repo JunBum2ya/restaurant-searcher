@@ -30,7 +30,6 @@ class SecurityConfig(
     fun securityFilterChain(httpSecurity: HttpSecurity): SecurityFilterChain {
         return httpSecurity
             .csrf { it.disable() }
-            .requiresChannel { it.anyRequest().requiresSecure() }
             .exceptionHandling {
                 it.authenticationEntryPoint(jwtAuthenticationEntryPoint).accessDeniedHandler(jwtAccessDeniedHandler)
             }
